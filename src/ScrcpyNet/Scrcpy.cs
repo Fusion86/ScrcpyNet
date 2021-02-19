@@ -18,11 +18,13 @@ namespace ScrcpyNet
 
         private readonly AdbClient adb;
         private readonly DeviceData device;
+        private readonly StreamDecoder? decoder;
 
-        public Scrcpy(DeviceData device)
+        public Scrcpy(DeviceData device, StreamDecoder? decoder = null)
         {
             adb = new AdbClient();
             this.device = device;
+            this.decoder = decoder;
         }
 
         public void Start()
@@ -124,6 +126,7 @@ namespace ScrcpyNet
                     }
 
                     Log.Verbose($"Presentation Time: {presentationTimeUs} us, PacketSize: {packetSize} bytes");
+                    decoder?.Decode(frameBuf);
 
                     pool.Return(frameBuf);
                 }

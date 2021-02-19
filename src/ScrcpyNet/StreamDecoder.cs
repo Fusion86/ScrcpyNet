@@ -3,14 +3,15 @@ using Serilog;
 using System;
 using System.Buffers;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 namespace ScrcpyNet
 {
+    // TODO: Make FrameData Data format configurable.
+
     public ref struct FrameData
     {
         /// <summary>
-        /// Byte array with the frame data in BGR24 format.
+        /// Byte array with the frame data in BGRA32 format.
         /// </summary>
         public ReadOnlySpan<byte> Data { get; }
 
@@ -105,7 +106,11 @@ namespace ScrcpyNet
 
             if (ret != ffmpeg.AVERROR(ffmpeg.EAGAIN))
             {
-                if (ret < 0) throw new Exception("Error sending a packet for decoding.");
+                if (ret < 0)
+                {
+                    Log.Error("Error sending a packet for decoding.");
+                    return;
+                }
 
                 while (ret >= 0)
                 {
@@ -117,14 +122,14 @@ namespace ScrcpyNet
 
                     FrameNumber++;
 
-                    int destSize = 3 * frame->width * frame->height;
-                    int[] destStride = new int[] { 3 * frame->width };
+                    int destSize = 4 * frame->width * frame->height;
+                    int[] destStride = new int[] { 4 * frame->width };
 
                     // In my tests the code crashed when we use a C# byte-array (new byte[])
                     byte* destBufferPtr = (byte*)ffmpeg.av_malloc((ulong)destSize);
                     byte*[] dest = { destBufferPtr };
 
-                    swsContext = ffmpeg.sws_getCachedContext(swsContext, frame->width, frame->height, ctx->pix_fmt, frame->width, frame->height, AVPixelFormat.AV_PIX_FMT_BGR24, ffmpeg.SWS_BICUBIC, null, null, null);
+                    swsContext = ffmpeg.sws_getCachedContext(swsContext, frame->width, frame->height, ctx->pix_fmt, frame->width, frame->height, AVPixelFormat.AV_PIX_FMT_BGRA, ffmpeg.SWS_BICUBIC, null, null, null);
 
                     if (swsContext == null) throw new Exception("Couldn't allocate SwsContext.");
 
@@ -132,11 +137,11 @@ namespace ScrcpyNet
 
                     if (outputSliceHeight > 0)
                     {
-                        byte[] managedBuffer = pool.Rent(destSize);
-                        Marshal.Copy((IntPtr)destBufferPtr, managedBuffer, 0, destSize);
-
+                        //byte[] managedBuffer = pool.Rent(destSize);
+                        //Marshal.Copy((IntPtr)destBufferPtr, managedBuffer, 0, destSize);
+                        var managedBuffer = new ReadOnlySpan<byte>(destBufferPtr, destSize);
                         OnFrame(new FrameData(managedBuffer, frame->width, frame->height, ctx->frame_number, sw.ElapsedMilliseconds));
-                        pool.Return(managedBuffer);
+                        //pool.Return(managedBuffer);
                     }
                     else
                     {
