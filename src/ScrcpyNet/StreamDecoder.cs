@@ -36,6 +36,15 @@ namespace ScrcpyNet
 
     public unsafe class StreamDecoder : IDisposable
     {
+        /// <summary>
+        /// Scrcpy context that feeds packets to this StreamDecoder.
+        /// Can be <see langword="null"/> when the packets are not originating from a scrcpy server, e.g. when decoding a file.
+        /// </summary>
+        public Scrcpy? ScrcpyContext { get; set; }
+
+        /// <summary>
+        /// Number of the last decoded frame.
+        /// </summary>
         public int FrameNumber { get; private set; }
 
         private bool disposed;
@@ -46,7 +55,6 @@ namespace ScrcpyNet
         private readonly AVCodecContext* ctx;
         private readonly AVFrame* frame;
         private readonly AVPacket* packet;
-        private readonly ArrayPool<byte> pool = ArrayPool<byte>.Shared;
 
         public StreamDecoder()
         {
@@ -54,10 +62,10 @@ namespace ScrcpyNet
             if (codec == null) throw new Exception("Couldn't find AVCodec for AV_CODEC_ID_H264.");
 
             parser = ffmpeg.av_parser_init((int)codec->id);
-            if (parser == null) throw new Exception("Couldn't initialize AVCodecParserContext");
+            if (parser == null) throw new Exception("Couldn't initialize AVCodecParserContext.");
 
             ctx = ffmpeg.avcodec_alloc_context3(codec);
-            if (ctx == null) throw new Exception("Couldn't allocate AVCodecContext");
+            if (ctx == null) throw new Exception("Couldn't allocate AVCodecContext.");
 
             int ret = ffmpeg.avcodec_open2(ctx, codec, null);
             if (ret < 0) throw new Exception("Couldn't open AVCodecContext.");
@@ -75,7 +83,7 @@ namespace ScrcpyNet
             Dispose(disposing: false);
         }
 
-        public void Decode(byte[] data)
+        public void Decode(byte[] data, long pts = -1)
         {
             fixed (byte* dataPtr = data)
             {
@@ -94,6 +102,7 @@ namespace ScrcpyNet
 
                     if (packet->size != 0)
                     {
+                        packet->pts = pts != -1 ? pts : ffmpeg.AV_NOPTS_VALUE;
                         DecodePacket();
                     }
                 }
@@ -137,11 +146,8 @@ namespace ScrcpyNet
 
                     if (outputSliceHeight > 0)
                     {
-                        //byte[] managedBuffer = pool.Rent(destSize);
-                        //Marshal.Copy((IntPtr)destBufferPtr, managedBuffer, 0, destSize);
                         var managedBuffer = new ReadOnlySpan<byte>(destBufferPtr, destSize);
                         OnFrame(new FrameData(managedBuffer, frame->width, frame->height, ctx->frame_number, sw.ElapsedMilliseconds));
-                        //pool.Return(managedBuffer);
                     }
                     else
                     {

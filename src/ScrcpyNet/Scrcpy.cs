@@ -13,6 +13,10 @@ namespace ScrcpyNet
 {
     public class Scrcpy
     {
+        public string DeviceName { get; private set; } = "";
+        public int Width { get; private set; }
+        public int Height { get; private set; }
+
         private volatile bool shouldStop = false;
         private Thread? scrcpyThread;
 
@@ -25,16 +29,19 @@ namespace ScrcpyNet
             adb = new AdbClient();
             this.device = device;
             this.decoder = decoder;
+
+            if (decoder != null)
+                decoder.ScrcpyContext = this;
         }
 
-        public void Start()
+        public void Start(long bitrate = 1_000_000 * 32)
         {
             Setup();
 
             scrcpyThread = new Thread(ScrcpyListener);
             scrcpyThread.Start();
 
-            StartScrcpy(1_000_000 * 32);
+            StartScrcpy(bitrate);
         }
 
         public void Stop()
@@ -77,8 +84,13 @@ namespace ScrcpyNet
                     throw new Exception("bytesRead == 0");
 
                 // Decode device name from header.
-                string deviceName = Encoding.UTF8.GetString(deviceInfoBuf.AsSpan().Slice(0, 64)).TrimEnd(new[] { '\0' });
-                Log.Information("Device name: " + deviceName);
+                var deviceInfoSpan = deviceInfoBuf.AsSpan();
+                DeviceName = Encoding.UTF8.GetString(deviceInfoSpan.Slice(0, 64)).TrimEnd(new[] { '\0' });
+                Log.Information("Device name: " + DeviceName);
+
+                Width = BinaryPrimitives.ReadInt16BigEndian(deviceInfoSpan[64..]);
+                Height = BinaryPrimitives.ReadInt16BigEndian(deviceInfoSpan[66..]);
+                Log.Information($"{Width}x{Height}");
 
                 pool.Return(deviceInfoBuf);
 
@@ -103,20 +115,19 @@ namespace ScrcpyNet
                     if (bytesRead != 12)
                         throw new Exception("bytesRead != 12");
 
-                    var span = metaBuf.AsSpan();
-
                     // Decode metadata
-                    var presentationTimeUs = BinaryPrimitives.ReadInt64BigEndian(span);
-                    var packetSize = BinaryPrimitives.ReadInt32BigEndian(span[8..]);
+                    var metaSpan = metaBuf.AsSpan();
+                    var presentationTimeUs = BinaryPrimitives.ReadInt64BigEndian(metaSpan);
+                    var packetSize = BinaryPrimitives.ReadInt32BigEndian(metaSpan[8..]);
 
                     // Read the whole frame, this might require more than one .Read() call.
-                    var frameBuf = pool.Rent(packetSize + 12);
+                    var packetBuf = pool.Rent(packetSize);
                     var pos = 0;
                     var bytesToRead = packetSize;
 
                     while (bytesToRead != 0)
                     {
-                        bytesRead = clientStream.Read(frameBuf, pos, bytesToRead);
+                        bytesRead = clientStream.Read(packetBuf, pos, bytesToRead);
 
                         if (bytesRead == 0)
                             throw new Exception("bytesRead == 0");
@@ -126,9 +137,9 @@ namespace ScrcpyNet
                     }
 
                     Log.Verbose($"Presentation Time: {presentationTimeUs} us, PacketSize: {packetSize} bytes");
-                    decoder?.Decode(frameBuf);
+                    decoder?.Decode(packetBuf, presentationTimeUs);
 
-                    pool.Return(frameBuf);
+                    pool.Return(packetBuf);
                 }
 
                 Log.Information("Mobile device disconnected.");
@@ -154,7 +165,6 @@ namespace ScrcpyNet
         {
             Log.Information("Starting scrcpy...");
 
-            // TODO: Create own ConsoleOutputReceiver
             var cts = new CancellationTokenSource();
             var receiver = new SerilogOutputReceiver();
 
