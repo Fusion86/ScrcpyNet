@@ -9,7 +9,7 @@ namespace ScrcpyNet
         protected override void ProcessNewLines(IEnumerable<string> lines)
         {
             foreach (var line in lines)
-                Log.Information(line);
+                Log.Information("[server] {@LogLine}", line);
         }
     }
 }

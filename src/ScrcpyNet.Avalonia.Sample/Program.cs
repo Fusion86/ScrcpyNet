@@ -1,5 +1,7 @@
 using Avalonia;
+using Avalonia.ReactiveUI;
 using FFmpeg.AutoGen;
+using Serilog;
 
 namespace ScrcpyNet.Avalonia.Sample
 {
@@ -12,6 +14,11 @@ namespace ScrcpyNet.Avalonia.Sample
         {
             ffmpeg.RootPath = "L:/Sources/ffmpeg-4.3.2-2021-02-02-full_build-shared/bin";
 
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .WriteTo.Debug()
+                .CreateLogger();
+
             BuildAvaloniaApp()
                 .StartWithClassicDesktopLifetime(args);
         }
@@ -20,6 +27,7 @@ namespace ScrcpyNet.Avalonia.Sample
         public static AppBuilder BuildAvaloniaApp()
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
-                .LogToTrace();
+                .LogToTrace()
+                .UseReactiveUI();
     }
 }

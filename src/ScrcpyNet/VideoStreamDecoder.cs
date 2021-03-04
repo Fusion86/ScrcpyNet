@@ -1,13 +1,11 @@
 ﻿using FFmpeg.AutoGen;
 using Serilog;
 using System;
-using System.Buffers;
 using System.Diagnostics;
 
 namespace ScrcpyNet
 {
     // TODO: Make FrameData Data format configurable.
-
     public ref struct FrameData
     {
         /// <summary>
@@ -34,18 +32,12 @@ namespace ScrcpyNet
         }
     }
 
-    public unsafe class StreamDecoder : IDisposable
+    public unsafe class VideoStreamDecoder : IDisposable
     {
-        /// <summary>
-        /// Scrcpy context that feeds packets to this StreamDecoder.
-        /// Can be <see langword="null"/> when the packets are not originating from a scrcpy server, e.g. when decoding a file.
-        /// </summary>
-        public Scrcpy? ScrcpyContext { get; set; }
-
         /// <summary>
         /// Number of the last decoded frame.
         /// </summary>
-        public int FrameNumber { get; private set; }
+        public int FrameCount { get; private set; }
 
         private bool disposed;
         private SwsContext* swsContext = null;
@@ -56,7 +48,7 @@ namespace ScrcpyNet
         private readonly AVFrame* frame;
         private readonly AVPacket* packet;
 
-        public StreamDecoder()
+        public VideoStreamDecoder()
         {
             codec = ffmpeg.avcodec_find_decoder(AVCodecID.AV_CODEC_ID_H264);
             if (codec == null) throw new Exception("Couldn't find AVCodec for AV_CODEC_ID_H264.");
@@ -77,7 +69,7 @@ namespace ScrcpyNet
             if (frame == null) throw new Exception("Couldn't allocate AVPacket.");
         }
 
-        ~StreamDecoder()
+        ~VideoStreamDecoder()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: false);
@@ -92,7 +84,7 @@ namespace ScrcpyNet
 
                 while (dataSize > 0)
                 {
-                    int ret = ffmpeg.av_parser_parse2(parser, ctx, &packet->data, &packet->size, ptr, dataSize, ffmpeg.AV_NOPTS_VALUE, ffmpeg.AV_NOPTS_VALUE, 0);
+                    int ret = ffmpeg.av_parser_parse2(parser, ctx, &packet->data, &packet->size, ptr, dataSize, pts != -1 ? pts : ffmpeg.AV_NOPTS_VALUE, ffmpeg.AV_NOPTS_VALUE, 0);
 
                     if (ret < 0)
                         throw new Exception("Error while parsing.");
@@ -102,7 +94,6 @@ namespace ScrcpyNet
 
                     if (packet->size != 0)
                     {
-                        packet->pts = pts != -1 ? pts : ffmpeg.AV_NOPTS_VALUE;
                         DecodePacket();
                     }
                 }
@@ -129,7 +120,7 @@ namespace ScrcpyNet
                     if (ret == ffmpeg.AVERROR(ffmpeg.EAGAIN) || ret == ffmpeg.AVERROR(ffmpeg.AVERROR_EOF))
                         return;
 
-                    FrameNumber++;
+                    FrameCount++;
 
                     int destSize = 4 * frame->width * frame->height;
                     int[] destStride = new int[] { 4 * frame->width };
@@ -159,10 +150,9 @@ namespace ScrcpyNet
             }
         }
 
-        protected virtual void OnFrame(FrameData frameData)
+        protected virtual void OnFrame(FrameData frame)
         {
-            Log.Debug("Frame: " + frameData.FrameNumber);
-            Log.Debug($"Frametime: {frameData.FrameTime}ms");
+
         }
 
         protected virtual void Dispose(bool disposing)

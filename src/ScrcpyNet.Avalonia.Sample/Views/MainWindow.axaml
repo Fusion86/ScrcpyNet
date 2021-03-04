@@ -1,0 +1,50 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ScrcpyNet.Avalonia.Sample.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:scrcpy="using:ScrcpyNet.Avalonia"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="ScrcpyNet.Avalonia.Sample.Views.MainWindow"
+        x:CompileBindings="True"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="ScrcpyNet.Avalonia.Sample">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid ColumnDefinitions="200,*">
+        <StackPanel Grid.Column="0" Margin="8" Spacing="8">
+            <StackPanel Spacing="4" IsVisible="{Binding !Scrcpy.IsConnected}">
+                <TextBlock Text="Connect to device" FontWeight="Bold"/>
+
+                <ComboBox Items="{Binding AvailableDevices}"
+                          SelectedItem="{Binding SelectedDevice}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Product}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <Button Content="Connect"
+                        Command="{Binding Scrcpy.ConnectCommand}"
+                        CommandParameter="{Binding SelectedDevice}"/>
+            </StackPanel>
+
+            <StackPanel Spacing="4" IsVisible="{Binding Scrcpy.IsConnected}">
+                <TextBlock Text="Connected device" FontWeight="Bold"/>
+                <TextBlock Text="{Binding Scrcpy.DeviceName}"/>
+
+                <Button Content="Disconnect" Command="{Binding Scrcpy.DisconnectCommand}"/>
+            </StackPanel>
+
+            <TextBlock Margin="10" Foreground="Red"/>
+        </StackPanel>
+
+        <scrcpy:ScrcpyDisplay Scrcpy="{Binding Scrcpy.Scrcpy}" Grid.Column="1"/>
+    </Grid>
+
+</Window>

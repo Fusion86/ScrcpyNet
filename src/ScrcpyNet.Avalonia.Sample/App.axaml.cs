@@ -1,6 +1,8 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using ScrcpyNet.Avalonia.Sample.ViewModels;
+using ScrcpyNet.Avalonia.Sample.Views;
 
 namespace ScrcpyNet.Avalonia.Sample
 {
@@ -15,7 +17,10 @@ namespace ScrcpyNet.Avalonia.Sample
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                desktop.MainWindow = new MainWindow();
+                desktop.MainWindow = new MainWindow
+                {
+                    DataContext = new MainWindowViewModel(),
+                };
             }
 
             base.OnFrameworkInitializationCompleted();

@@ -37,7 +37,7 @@ namespace ScrcpyNet.Test
         [TestMethod]
         public void StreamDecoder()
         {
-            StreamDecoder dec = new StreamDecoder();
+            VideoStreamDecoder dec = new VideoStreamDecoder();
             FileStream fs = File.OpenRead(@"L:\Repos\LupoCV\LupoCV.CLI\bin\Debug\netcoreapp3.1\frames.avc");
 
             byte[] buffer = new byte[1024 * 16];

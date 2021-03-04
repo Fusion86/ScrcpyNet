@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScrcpyNet", "src\ScrcpyNet\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScrcpyNet.Benchmark", "src\ScrcpyNet.Benchmark\ScrcpyNet.Benchmark.csproj", "{6EEF9E50-DC36-453D-983F-4C6191E4C497}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScrcpyNet.Avalonia.Sample", "src\ScrcpyNet.Avalonia.Sample\ScrcpyNet.Avalonia.Sample.csproj", "{98365117-CE59-4FEA-8287-E8FB50D56B56}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScrcpyNet.Avalonia", "src\ScrcpyNet.Avalonia\ScrcpyNet.Avalonia.csproj", "{890EC608-4421-40B6-AE80-32472A46850B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScrcpyNet.Avalonia.Sample", "src\ScrcpyNet.Avalonia.Sample\ScrcpyNet.Avalonia.Sample.csproj", "{C377200A-CA4E-49F0-98AC-5496FEC258C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +31,14 @@ Global
 		{6EEF9E50-DC36-453D-983F-4C6191E4C497}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6EEF9E50-DC36-453D-983F-4C6191E4C497}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6EEF9E50-DC36-453D-983F-4C6191E4C497}.Release|Any CPU.Build.0 = Release|Any CPU
-		{98365117-CE59-4FEA-8287-E8FB50D56B56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{98365117-CE59-4FEA-8287-E8FB50D56B56}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{98365117-CE59-4FEA-8287-E8FB50D56B56}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{98365117-CE59-4FEA-8287-E8FB50D56B56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{890EC608-4421-40B6-AE80-32472A46850B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{890EC608-4421-40B6-AE80-32472A46850B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{890EC608-4421-40B6-AE80-32472A46850B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{890EC608-4421-40B6-AE80-32472A46850B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C377200A-CA4E-49F0-98AC-5496FEC258C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C377200A-CA4E-49F0-98AC-5496FEC258C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C377200A-CA4E-49F0-98AC-5496FEC258C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C377200A-CA4E-49F0-98AC-5496FEC258C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
