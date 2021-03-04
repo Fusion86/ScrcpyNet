@@ -2,6 +2,7 @@
 using Serilog;
 using System;
 using System.Diagnostics;
+using System.Text;
 
 namespace ScrcpyNet
 {
@@ -108,7 +109,14 @@ namespace ScrcpyNet
             {
                 if (ret < 0)
                 {
-                    Log.Error("Error sending a packet for decoding.");
+                    byte[] errorMessageBytes = new byte[512];
+
+                    fixed (byte* ptr = errorMessageBytes)
+                        ffmpeg.av_make_error_string(ptr, (ulong)errorMessageBytes.Length, ret);
+
+                    string errorMessage = Encoding.UTF8.GetString(errorMessageBytes);
+
+                    Log.Error("Error sending a packet for decoding. {@ErrorMessage}", errorMessageBytes);
                     return;
                 }
 

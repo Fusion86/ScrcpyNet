@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using ScrcpyNet.Avalonia.Sample.ViewModels;
 using System;
-using System.ComponentModel;
 
 namespace ScrcpyNet.Avalonia.Sample.Views
 {
@@ -22,9 +21,9 @@ namespace ScrcpyNet.Avalonia.Sample.Views
             AvaloniaXamlLoader.Load(this);
         }
 
-        protected override void OnClosing(CancelEventArgs e)
+        protected override void OnClosed(EventArgs e)
         {
-            base.OnClosing(e);
+            base.OnClosed(e);
 
             if (DataContext is MainWindowViewModel vm)
                 vm.Scrcpy.DisconnectCommand.Execute().Subscribe();

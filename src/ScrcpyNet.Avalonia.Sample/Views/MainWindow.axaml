@@ -39,6 +39,7 @@
                 <TextBlock Text="{Binding Scrcpy.DeviceName}"/>
 
                 <Button Content="Disconnect" Command="{Binding Scrcpy.DisconnectCommand}"/>
+                <Button Content="Send Control" Command="{Binding Scrcpy.SendControlCommand}"/>
             </StackPanel>
 
             <TextBlock Margin="10" Foreground="Red"/>

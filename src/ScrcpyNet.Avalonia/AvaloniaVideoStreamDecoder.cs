@@ -14,9 +14,9 @@ namespace ScrcpyNet.Avalonia
         public int RenderedFrames { get; private set; }
         public int DroppedFrames => FrameCount - RenderedFrames;
 
-        private bool hasNewFrame = false;
-        private Image targetControl;
         private WriteableBitmap? bmp;
+        private bool hasNewFrame = false;
+        private readonly Image targetControl;
 
         public AvaloniaVideoStreamDecoder(Image image)
         {

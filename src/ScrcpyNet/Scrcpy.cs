@@ -3,6 +3,7 @@ using SharpAdbClient;
 using System;
 using System.Buffers;
 using System.Buffers.Binary;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -29,6 +30,7 @@ namespace ScrcpyNet
 
         private readonly AdbClient adb;
         private readonly DeviceData device;
+        private readonly ConcurrentQueue<IControlMessage> controlQueue = new ConcurrentQueue<IControlMessage>();
         private static readonly ArrayPool<byte> pool = ArrayPool<byte>.Shared;
 
         public Scrcpy(DeviceData device, VideoStreamDecoder? videoStreamDecoder = null)
@@ -102,20 +104,12 @@ namespace ScrcpyNet
         }
 
         // TODO: Implement this
-        public void SendCommandTmp()
+        public void SendControlCommand(IControlMessage msg)
         {
             if (controlClient == null)
                 throw new Exception();
 
-            var stream = controlClient.GetStream();
-
-            // Keypress
-            var msg = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x24, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00 };
-            stream.Write(msg);
-
-            // Key release
-            msg = new byte[] { 0x00, 0x01, 0x00, 0x00, 0x00, 0x24, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00 };
-            stream.Write(msg);
+            controlQueue.Enqueue(msg);
         }
 
         private void ReadDeviceInfo()
@@ -196,7 +190,7 @@ namespace ScrcpyNet
                     bytesToRead -= bytesRead;
                 }
 
-                Log.Verbose($"Presentation Time: {presentationTimeUs}us, PacketSize: {packetSize} bytes");
+                //Log.Verbose($"Presentation Time: {presentationTimeUs}us, PacketSize: {packetSize} bytes");
                 videoStreamDecoder?.Decode(packetBuf, presentationTimeUs);
 
                 pool.Return(packetBuf);
@@ -209,9 +203,18 @@ namespace ScrcpyNet
             if (controlClient == null) throw new Exception("controlClient is null.");
             if (cts == null) throw new Exception("cts is null.");
 
+            var stream = controlClient.GetStream();
+
             while (!cts.Token.IsCancellationRequested)
             {
-                Thread.Sleep(1000);
+                if (controlQueue.TryDequeue(out var cmd))
+                {
+                    stream.Write(cmd.ToBytes());
+                }
+                else
+                {
+                    Thread.Sleep(10);
+                }
             }
         }
 
