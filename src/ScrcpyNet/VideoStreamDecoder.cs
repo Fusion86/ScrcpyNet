@@ -35,6 +35,8 @@ namespace ScrcpyNet
 
     public unsafe class VideoStreamDecoder : IDisposable
     {
+        public Scrcpy? Scrcpy { get; set; }
+
         /// <summary>
         /// Number of the last decoded frame.
         /// </summary>
@@ -109,26 +111,33 @@ namespace ScrcpyNet
             {
                 if (ret < 0)
                 {
+                    string errorMessage;
                     byte[] errorMessageBytes = new byte[512];
 
                     fixed (byte* ptr = errorMessageBytes)
+                    {
                         ffmpeg.av_make_error_string(ptr, (ulong)errorMessageBytes.Length, ret);
+                        errorMessage = new string((char*)ptr);
+                    }
 
-                    string errorMessage = Encoding.UTF8.GetString(errorMessageBytes);
-
-                    Log.Error("Error sending a packet for decoding. {@ErrorMessage}", errorMessageBytes);
+                    Log.Error("Error sending a packet for decoding. {@ErrorMessage}", errorMessage);
                     return;
                 }
 
                 while (ret >= 0)
                 {
-                    var sw = Stopwatch.StartNew();
                     ret = ffmpeg.avcodec_receive_frame(ctx, frame);
 
                     if (ret == ffmpeg.AVERROR(ffmpeg.EAGAIN) || ret == ffmpeg.AVERROR(ffmpeg.AVERROR_EOF))
                         return;
 
                     FrameCount++;
+
+                    if (Scrcpy != null)
+                    {
+                        Scrcpy.Width = frame->width;
+                        Scrcpy.Height = frame->height;
+                    }
 
                     int destSize = 4 * frame->width * frame->height;
                     int[] destStride = new int[] { 4 * frame->width };
@@ -137,6 +146,7 @@ namespace ScrcpyNet
                     byte* destBufferPtr = (byte*)ffmpeg.av_malloc((ulong)destSize);
                     byte*[] dest = { destBufferPtr };
 
+                    // TODO: Might have a small leak here.
                     swsContext = ffmpeg.sws_getCachedContext(swsContext, frame->width, frame->height, ctx->pix_fmt, frame->width, frame->height, AVPixelFormat.AV_PIX_FMT_BGRA, ffmpeg.SWS_BICUBIC, null, null, null);
 
                     if (swsContext == null) throw new Exception("Couldn't allocate SwsContext.");
@@ -146,7 +156,7 @@ namespace ScrcpyNet
                     if (outputSliceHeight > 0)
                     {
                         var managedBuffer = new ReadOnlySpan<byte>(destBufferPtr, destSize);
-                        OnFrame(new FrameData(managedBuffer, frame->width, frame->height, ctx->frame_number, sw.ElapsedMilliseconds));
+                        OnFrame(new FrameData(managedBuffer, frame->width, frame->height, ctx->frame_number, -1));
                     }
                     else
                     {

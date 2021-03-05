@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace ScrcpyNet.Avalonia
 {
-    public static class KeycodeConverter
+    public static class KeycodeHelper
     {
         private static readonly Dictionary<Key, AndroidKeycode> keycodeDict = new Dictionary<Key, AndroidKeycode>
         {

@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Rendering;
 using Avalonia.Threading;
+using Serilog;
 using System;
 
 using AvaloniaPlatform = Avalonia.Platform;
@@ -41,6 +42,8 @@ namespace ScrcpyNet.Avalonia
             }
 
             hasNewFrame = true;
+
+            //Log.Verbose("Frametime: {@FrameTime}", frameData.FrameTime);
         }
 
         private void RenderTick(TimeSpan obj)

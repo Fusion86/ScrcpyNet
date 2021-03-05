@@ -1,9 +1,11 @@
-﻿using Serilog;
+﻿using ScrcpyNet.Extensions;
+using Serilog;
 using SharpAdbClient;
 using System;
 using System.Buffers;
 using System.Buffers.Binary;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -15,10 +17,11 @@ namespace ScrcpyNet
     public class Scrcpy
     {
         public string DeviceName { get; private set; } = "";
-        public int Width { get; private set; }
-        public int Height { get; private set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public long Bitrate { get; set; }
 
-        public bool Connected { get; set; }
+        public bool Connected { get; private set; }
 
         private Thread? videoThread;
         private Thread? controlThread;
@@ -43,6 +46,7 @@ namespace ScrcpyNet
         public void SetDecoder(VideoStreamDecoder videoStreamDecoder)
         {
             this.videoStreamDecoder = videoStreamDecoder;
+            this.videoStreamDecoder.Scrcpy = this;
         }
 
         public void Start(long timeoutMs = 5000)
@@ -151,6 +155,8 @@ namespace ScrcpyNet
             int bytesRead = 0;
             var metaBuf = pool.Rent(12);
 
+            Stopwatch sw = new Stopwatch();
+
             while (!cts.Token.IsCancellationRequested)
             {
                 // Read metadata (each packet starts with some metadata)
@@ -168,6 +174,8 @@ namespace ScrcpyNet
 
                 if (bytesRead != 12)
                     throw new Exception($"Expected to read exactly 12 bytes, but got {bytesRead} bytes.");
+
+                sw.Restart();
 
                 // Decode metadata
                 var metaSpan = metaBuf.AsSpan();
@@ -193,6 +201,10 @@ namespace ScrcpyNet
                 //Log.Verbose($"Presentation Time: {presentationTimeUs}us, PacketSize: {packetSize} bytes");
                 videoStreamDecoder?.Decode(packetBuf, presentationTimeUs);
 
+                Log.Verbose("Received and decoded a packet in {@ElapsedMilliseconds} ms", sw.ElapsedMilliseconds);
+                sw.Stop();
+
+
                 pool.Return(packetBuf);
             }
         }
@@ -209,11 +221,9 @@ namespace ScrcpyNet
             {
                 if (controlQueue.TryDequeue(out var cmd))
                 {
-                    stream.Write(cmd.ToBytes());
-                }
-                else
-                {
-                    Thread.Sleep(10);
+                    Log.Verbose("Sending control message: {@ControlMessage}", cmd.Type);
+                    var bytes = cmd.ToBytes();
+                    stream.Write(bytes);
                 }
             }
         }
@@ -251,13 +261,12 @@ namespace ScrcpyNet
             var receiver = new SerilogOutputReceiver();
 
             string version = "1.17";
-            long bitrate = 8000000;
             int maxFramerate = 0;
             int orientation = -1; // -1 means allow rotate
             string control = "true";
             string showTouches = "false";
             string stayAwake = "false";
-            string command = $"CLASSPATH=/data/local/tmp/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server {version} debug 0 {bitrate} {maxFramerate} {orientation} false - true {control} 0 {showTouches} {stayAwake} - -";
+            string command = $"CLASSPATH=/data/local/tmp/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server {version} debug 0 {Bitrate} {maxFramerate} {orientation} false - true {control} 0 {showTouches} {stayAwake} - -";
 
             Log.Information("Start command: " + command);
             _ = adb.ExecuteRemoteCommandAsync(command, device, receiver, cts.Token);

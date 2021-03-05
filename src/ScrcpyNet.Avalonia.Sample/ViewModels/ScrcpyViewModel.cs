@@ -8,19 +8,19 @@ namespace ScrcpyNet.Avalonia.Sample.ViewModels
 {
     public class ScrcpyViewModel : ViewModelBase
     {
+        [Reactive] public double Bitrate { get; set; } = 8000000;
+
         [Reactive] public bool IsConnected { get; private set; }
         [Reactive] public string DeviceName { get; private set; } = "";
         [Reactive] public Scrcpy? Scrcpy { get; private set; }
 
         public ReactiveCommand<DeviceData, Unit> ConnectCommand { get; }
         public ReactiveCommand<Unit, Unit> DisconnectCommand { get; }
-        public ReactiveCommand<Unit, Unit> SendControlCommand { get; }
 
         public ScrcpyViewModel()
         {
             ConnectCommand = ReactiveCommand.Create<DeviceData>(Connect);
             DisconnectCommand = ReactiveCommand.Create(Disconnect);
-            SendControlCommand = ReactiveCommand.Create(SendControl);
         }
 
         private void Connect(DeviceData device)
@@ -29,6 +29,7 @@ namespace ScrcpyNet.Avalonia.Sample.ViewModels
             if (Scrcpy != null) throw new Exception("Already connected.");
 
             Scrcpy = new Scrcpy(device);
+            Scrcpy.Bitrate = (long)Bitrate;
             Scrcpy.Start();
             DeviceName = Scrcpy.DeviceName;
             IsConnected = true;
@@ -42,12 +43,6 @@ namespace ScrcpyNet.Avalonia.Sample.ViewModels
                 IsConnected = false;
                 Scrcpy = null;
             }
-        }
-
-        private void SendControl()
-        {
-            //if (Scrcpy != null)
-            //    Scrcpy.SendControlCommand();
         }
     }
 }
