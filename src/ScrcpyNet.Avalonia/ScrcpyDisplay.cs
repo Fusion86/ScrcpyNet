@@ -65,11 +65,7 @@ namespace ScrcpyNet.Avalonia
                 if (bmp == null || bmp.Size.Width != frameData.Width || bmp.Size.Height != frameData.Height)
                 {
                     bmp = new WriteableBitmap(new PixelSize(frameData.Width, frameData.Height), new Vector(96, 96), AvaloniaPlatform.PixelFormat.Bgra8888, AvaloniaPlatform.AlphaFormat.Opaque);
-                    Dispatcher.UIThread.Post(() =>
-                    {
-                        Log.Warning("UIThread Post");
-                        renderTarget.Source = bmp;
-                    });
+                    Dispatcher.UIThread.Post(() => renderTarget.Source = bmp);
                 }
 
                 using (var l = bmp.Lock())
@@ -192,10 +188,17 @@ namespace ScrcpyNet.Avalonia
         {
             if (hasNewFrame && renderTarget != null)
             {
-                // This sometimes crashes. Not sure if it's an Avalonia issue?
-                renderTarget.InvalidateVisual();
-                hasNewFrame = false;
-                RenderedFrames++;
+                try
+                {
+                    // This sometimes crashes. Not sure if it's an Avalonia issue?
+                    renderTarget.InvalidateVisual();
+                    hasNewFrame = false;
+                    RenderedFrames++;
+                }
+                catch
+                {
+                    Log.Error("Crash!");
+                }
             }
         }
     }
