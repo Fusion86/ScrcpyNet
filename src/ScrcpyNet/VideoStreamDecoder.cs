@@ -84,7 +84,9 @@ namespace ScrcpyNet
         public event EventHandler<FrameData>? OnFrame;
 
         private bool disposed;
+        private bool dontDisposeLastFrame;
         private SwsContext* swsContext = null;
+        private FrameData? lastFrame;
 
         private readonly AVCodec* codec;
         private readonly AVCodecParserContext* parser;
@@ -117,6 +119,12 @@ namespace ScrcpyNet
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: false);
+        }
+
+        public FrameData? GetLastFrame()
+        {
+            dontDisposeLastFrame = true;
+            return lastFrame;
         }
 
         public void Decode(byte[] data, long pts = -1)
@@ -194,14 +202,19 @@ namespace ScrcpyNet
 
                     if (outputSliceHeight > 0)
                     {
-                        // FrameData takes ownership of the destBufferPtr and will free it when disposed!
-                        var frameData = new FrameData(destBufferPtr, destSize, frame->width, frame->height, ctx->frame_number, AVPixelFormat.AV_PIX_FMT_BGRA);
-                        OnFrame?.Invoke(this, frameData);
+                        // Shitty workaround
+                        // Poor man's reference counting. dontDisposeLastFrame will be set to true when someone calls GetLastFrame()
+                        if (lastFrame != null && !dontDisposeLastFrame)
+                        {
+                            // We don't have to dispose it, but then the GC will remove all old frames after 'some time'.
+                            // On my 32GB RAM computer the GC allowed the app to use up to 8GB before cleanup it up.
+                            lastFrame.Dispose();
+                        }
+                        dontDisposeLastFrame = false;
 
-                        // This frees the destBufferPtr.
-                        // We don't have to dispose it, but then the GC will remove all old frames after 'some time'.
-                        // In my tests the GC usually kicked in after 2GB of 'unused' data.
-                        frameData.Dispose();
+                        // FrameData takes ownership of the destBufferPtr and will free it when disposed!
+                        lastFrame = new FrameData(destBufferPtr, destSize, frame->width, frame->height, ctx->frame_number, AVPixelFormat.AV_PIX_FMT_BGRA);
+                        OnFrame?.Invoke(this, lastFrame);
                     }
                     else
                     {
