@@ -20,8 +20,10 @@ namespace ScrcpyNet
         public int Width { get; set; }
         public int Height { get; set; }
         public long Bitrate { get; set; }
+        public string ScrcpyServerFile { get; set; } = "scrcpy-server.jar";
 
         public bool Connected { get; private set; }
+        public VideoStreamDecoder VideoStreamDecoder { get; }
 
         private Thread? videoThread;
         private Thread? controlThread;
@@ -29,7 +31,6 @@ namespace ScrcpyNet
         private TcpClient? controlClient;
         private TcpListener? listener;
         private CancellationTokenSource? cts;
-        private VideoStreamDecoder? videoStreamDecoder;
 
         private readonly AdbClient adb;
         private readonly DeviceData device;
@@ -40,14 +41,15 @@ namespace ScrcpyNet
         {
             adb = new AdbClient();
             this.device = device;
-            this.videoStreamDecoder = videoStreamDecoder ?? new VideoStreamDecoder();
+            VideoStreamDecoder = videoStreamDecoder ?? new VideoStreamDecoder();
+            VideoStreamDecoder.Scrcpy = this;
         }
 
-        public void SetDecoder(VideoStreamDecoder videoStreamDecoder)
-        {
-            this.videoStreamDecoder = videoStreamDecoder;
-            this.videoStreamDecoder.Scrcpy = this;
-        }
+        //public void SetDecoder(VideoStreamDecoder videoStreamDecoder)
+        //{
+        //    this.videoStreamDecoder = videoStreamDecoder;
+        //    this.videoStreamDecoder.Scrcpy = this;
+        //}
 
         public void Start(long timeoutMs = 5000)
         {
@@ -199,7 +201,7 @@ namespace ScrcpyNet
                 }
 
                 //Log.Verbose($"Presentation Time: {presentationTimeUs}us, PacketSize: {packetSize} bytes");
-                videoStreamDecoder?.Decode(packetBuf, presentationTimeUs);
+                VideoStreamDecoder?.Decode(packetBuf, presentationTimeUs);
 
                 Log.Verbose("Received and decoded a packet in {@ElapsedMilliseconds} ms", sw.ElapsedMilliseconds);
                 sw.Stop();
@@ -275,7 +277,7 @@ namespace ScrcpyNet
         private void UploadMobileServer()
         {
             using SyncService service = new SyncService(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)), device);
-            using Stream stream = File.OpenRead(@"L:\Repos\LupoCV\LupoCV.Core.Test\bin\Debug\netcoreapp3.1\scrcpy-server.jar");
+            using Stream stream = File.OpenRead(ScrcpyServerFile);
             service.Push(stream, "/data/local/tmp/scrcpy-server.jar", 444, DateTime.Now, null, CancellationToken.None);
         }
     }

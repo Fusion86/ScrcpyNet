@@ -16,7 +16,7 @@ namespace ScrcpyNet.Avalonia.Sample
             ffmpeg.RootPath = "L:/Sources/ffmpeg-4.3.2-2021-02-02-full_build-shared/bin";
 
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Verbose()
+                //.MinimumLevel.Verbose()
                 .WriteTo.Console()
                 .WriteTo.Debug()
                 .CreateLogger();

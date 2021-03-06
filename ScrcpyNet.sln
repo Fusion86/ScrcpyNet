@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScrcpyNet.Benchmark", "src\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScrcpyNet.Avalonia", "src\ScrcpyNet.Avalonia\ScrcpyNet.Avalonia.csproj", "{890EC608-4421-40B6-AE80-32472A46850B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScrcpyNet.Avalonia.Sample", "src\ScrcpyNet.Avalonia.Sample\ScrcpyNet.Avalonia.Sample.csproj", "{C377200A-CA4E-49F0-98AC-5496FEC258C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScrcpyNet.Avalonia.Sample", "src\ScrcpyNet.Avalonia.Sample\ScrcpyNet.Avalonia.Sample.csproj", "{C377200A-CA4E-49F0-98AC-5496FEC258C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

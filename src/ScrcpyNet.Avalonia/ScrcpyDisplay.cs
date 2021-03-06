@@ -2,7 +2,13 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
+using Avalonia.Media.Imaging;
+using Avalonia.Rendering;
+using Avalonia.Threading;
 using Serilog;
+using System;
+using System.Diagnostics;
+using AvaloniaPlatform = Avalonia.Platform;
 
 using AVPoint = Avalonia.Point;
 
@@ -16,13 +22,22 @@ namespace ScrcpyNet.Avalonia
                 o => o.Scrcpy,
                 (o, v) => o.Scrcpy = v);
 
+        public int RenderedFrames { get; private set; }
+
+        private bool isTouching;
+        private bool hasNewFrame;
         private Scrcpy? scrcpy;
         private Image? renderTarget;
-        private bool isTouching;
+        private WriteableBitmap? bmp;
 
         static ScrcpyDisplay()
         {
             FocusableProperty.OverrideDefaultValue(typeof(ScrcpyDisplay), true);
+        }
+
+        public ScrcpyDisplay()
+        {
+            AvaloniaLocator.Current.GetService<IRenderTimer>().Tick += RenderTick;
         }
 
         public Scrcpy? Scrcpy
@@ -30,21 +45,46 @@ namespace ScrcpyNet.Avalonia
             get => scrcpy;
             set
             {
+                // Unsubscribe on the old scrcpy
+                if (scrcpy != null)
+                    scrcpy.VideoStreamDecoder.OnFrame -= OnFrame;
+
                 SetAndRaise(ScrcpyProperty, ref scrcpy, value);
-                UpdateRenderTarget();
+
+                // Subscribe on the new scrcpy
+                if (scrcpy != null)
+                    scrcpy.VideoStreamDecoder.OnFrame += OnFrame;
+            }
+        }
+
+        private unsafe void OnFrame(object sender, FrameData frameData)
+        {
+            var sw = Stopwatch.StartNew();
+            if (renderTarget != null)
+            {
+                if (bmp == null || bmp.Size.Width != frameData.Width || bmp.Size.Height != frameData.Height)
+                {
+                    bmp = new WriteableBitmap(new PixelSize(frameData.Width, frameData.Height), new Vector(96, 96), AvaloniaPlatform.PixelFormat.Bgra8888, AvaloniaPlatform.AlphaFormat.Opaque);
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        Log.Warning("UIThread Post");
+                        renderTarget.Source = bmp;
+                    });
+                }
+
+                using (var l = bmp.Lock())
+                {
+                    var dest = new Span<byte>(l.Address.ToPointer(), frameData.Data.Length);
+                    frameData.Data.CopyTo(dest);
+                }
+
+                hasNewFrame = true;
             }
         }
 
         protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
         {
             renderTarget = e.NameScope.Find<Image>("PART_RenderTargetImage");
-            UpdateRenderTarget();
-        }
-
-        protected void UpdateRenderTarget()
-        {
-            if (renderTarget != null && scrcpy != null)
-                scrcpy.SetDecoder(new AvaloniaVideoStreamDecoder(renderTarget));
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
@@ -145,6 +185,17 @@ namespace ScrcpyNet.Avalonia
                 msg.Position.ScreenSize.Height = (ushort)renderTarget.Bounds.Height;
                 TouchHelper.ScaleToScreenSize(ref msg.Position, scrcpy.Width, scrcpy.Height);
                 scrcpy.SendControlCommand(msg);
+            }
+        }
+
+        private void RenderTick(TimeSpan obj)
+        {
+            if (hasNewFrame && renderTarget != null)
+            {
+                // This sometimes crashes. Not sure if it's an Avalonia issue?
+                renderTarget.InvalidateVisual();
+                hasNewFrame = false;
+                RenderedFrames++;
             }
         }
     }

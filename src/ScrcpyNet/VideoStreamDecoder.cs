@@ -1,35 +1,74 @@
 ﻿using FFmpeg.AutoGen;
 using Serilog;
 using System;
-using System.Diagnostics;
 using System.Text;
 
 namespace ScrcpyNet
 {
-    // TODO: Make FrameData Data format configurable.
-    public ref struct FrameData
+    public unsafe class FrameData : IDisposable
     {
+        private bool disposed;
+
         /// <summary>
         /// Byte array with the frame data in BGRA32 format.
+        /// WARNING: This field is only valid inside the OnFrame event. After this is finished the Data will be freed.
+        /// If you need the Data field outside the OnFrame event then make sure to copy it somewhere.
         /// </summary>
-        public ReadOnlySpan<byte> Data { get; }
+        public ReadOnlySpan<byte> Data
+        {
+            get
+            {
+                // This line might not be needed?
+                if (disposed) throw new ObjectDisposedException(nameof(FrameData));
+                return new ReadOnlySpan<byte>(data, length);
+            }
+        }
 
         public int Width { get; }
         public int Height { get; }
         public int FrameNumber { get; }
+        public AVPixelFormat PixelFormat { get; }
 
-        /// <summary>
-        /// Frametime in milliseconds.
-        /// </summary>
-        public long FrameTime { get; }
+        private readonly byte* data;
+        private readonly int length;
 
-        public FrameData(ReadOnlySpan<byte> data, int width, int height, int frameNumber, long frameTime)
+        public FrameData(byte* data, int length, int width, int height, int frameNumber, AVPixelFormat pixelFormat)
         {
-            Data = data;
+            this.data = data;
+            this.length = length;
             Width = width;
             Height = height;
             FrameNumber = frameNumber;
-            FrameTime = frameTime;
+            PixelFormat = pixelFormat;
+        }
+
+        ~FrameData()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: false);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    // Dispose managed state (managed objects)
+                }
+
+                // Free unmanaged resources (unmanaged objects) and override finalizer
+                ffmpeg.av_free(data);
+
+                disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 
@@ -41,6 +80,8 @@ namespace ScrcpyNet
         /// Number of the last decoded frame.
         /// </summary>
         public int FrameCount { get; private set; }
+
+        public event EventHandler<FrameData>? OnFrame;
 
         private bool disposed;
         private SwsContext* swsContext = null;
@@ -111,16 +152,14 @@ namespace ScrcpyNet
             {
                 if (ret < 0)
                 {
-                    string errorMessage;
                     byte[] errorMessageBytes = new byte[512];
-
                     fixed (byte* ptr = errorMessageBytes)
                     {
-                        ffmpeg.av_make_error_string(ptr, (ulong)errorMessageBytes.Length, ret);
-                        errorMessage = new string((char*)ptr);
+                        ffmpeg.av_strerror(ret, ptr, (ulong)errorMessageBytes.Length);
+                        string errorMessage = new string((sbyte*)ptr, 0, errorMessageBytes.Length - 1, Encoding.ASCII);
+                        Log.Error("Error sending a packet for decoding. {@ErrorMessage}", errorMessage);
                     }
 
-                    Log.Error("Error sending a packet for decoding. {@ErrorMessage}", errorMessage);
                     return;
                 }
 
@@ -155,22 +194,24 @@ namespace ScrcpyNet
 
                     if (outputSliceHeight > 0)
                     {
-                        var managedBuffer = new ReadOnlySpan<byte>(destBufferPtr, destSize);
-                        OnFrame(new FrameData(managedBuffer, frame->width, frame->height, ctx->frame_number, -1));
+                        // FrameData takes ownership of the destBufferPtr and will free it when disposed!
+                        var frameData = new FrameData(destBufferPtr, destSize, frame->width, frame->height, ctx->frame_number, AVPixelFormat.AV_PIX_FMT_BGRA);
+                        OnFrame?.Invoke(this, frameData);
+
+                        // This frees the destBufferPtr.
+                        // We don't have to dispose it, but then the GC will remove all old frames after 'some time'.
+                        // In my tests the GC usually kicked in after 2GB of 'unused' data.
+                        frameData.Dispose();
                     }
                     else
                     {
                         Log.Warning("outputSliceHeight == 0, not sure if this is bad?");
-                    }
 
-                    ffmpeg.av_free(destBufferPtr);
+                        // Manually free the destBufferPtr when we don't create a FrameData object.
+                        ffmpeg.av_free(destBufferPtr);
+                    }
                 }
             }
-        }
-
-        protected virtual void OnFrame(FrameData frame)
-        {
-
         }
 
         protected virtual void Dispose(bool disposing)
