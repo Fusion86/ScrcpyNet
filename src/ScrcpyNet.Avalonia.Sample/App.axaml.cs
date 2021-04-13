@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using ReactiveUI;
 using ScrcpyNet.Avalonia.Sample.ViewModels;
 using ScrcpyNet.Avalonia.Sample.Views;
 
@@ -10,6 +11,7 @@ namespace ScrcpyNet.Avalonia.Sample
     {
         public override void Initialize()
         {
+            RxApp.DefaultExceptionHandler = new RxExceptionHandler();
             AvaloniaXamlLoader.Load(this);
         }
 

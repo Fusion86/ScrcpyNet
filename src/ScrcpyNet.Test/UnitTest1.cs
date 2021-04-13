@@ -13,6 +13,7 @@ namespace ScrcpyNet.Test
         [AssemblyInitialize]
         public static void AssemblyInitialize(TestContext _)
         {
+            // HACK:
             ffmpeg.RootPath = "L:/Sources/ffmpeg-4.3.2-2021-02-02-full_build-shared/bin";
 
             Log.Logger = new LoggerConfiguration()

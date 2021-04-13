@@ -1,4 +1,6 @@
-﻿namespace ScrcpyNet
+﻿// Based on https://android.googlesource.com/platform/frameworks/native/+/master/include/android/input.h
+
+namespace ScrcpyNet
 {
     public enum AndroidKeyeventAction : byte
     {

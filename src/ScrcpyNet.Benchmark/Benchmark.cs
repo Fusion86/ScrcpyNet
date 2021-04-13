@@ -13,6 +13,7 @@ namespace ScrcpyNet.Benchmark
         [GlobalSetup]
         public void GlobalSetup()
         {
+            // HACK:
             ffmpeg.RootPath = "L:/Sources/ffmpeg-4.3.2-2021-02-02-full_build-shared/bin";
         }
 

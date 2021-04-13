@@ -1,4 +1,6 @@
-﻿namespace ScrcpyNet
+﻿// Based on https://android.googlesource.com/platform/frameworks/native/+/master/include/android/keycodes.h
+
+namespace ScrcpyNet
 {
     public enum AndroidKeycode : int
     {
