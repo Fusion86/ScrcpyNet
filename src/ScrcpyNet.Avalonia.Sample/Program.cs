@@ -1,8 +1,6 @@
 using Avalonia;
 using Avalonia.ReactiveUI;
-using FFmpeg.AutoGen;
 using Serilog;
-using Serilog.Events;
 
 namespace ScrcpyNet.Avalonia.Sample
 {
@@ -13,9 +11,6 @@ namespace ScrcpyNet.Avalonia.Sample
         // yet and stuff might break.
         public static void Main(string[] args)
         {
-            // HACK:
-            ffmpeg.RootPath = "L:/Sources/ffmpeg-4.3.2-2021-02-02-full_build-shared/bin";
-
             Log.Logger = new LoggerConfiguration()
                 //.MinimumLevel.Verbose()
                 .WriteTo.Console()

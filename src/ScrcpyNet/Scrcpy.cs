@@ -19,7 +19,7 @@ namespace ScrcpyNet
         public string DeviceName { get; private set; } = "";
         public int Width { get; set; }
         public int Height { get; set; }
-        public long Bitrate { get; set; }
+        public long Bitrate { get; set; } = 8000000;
         public string ScrcpyServerFile { get; set; } = "scrcpy-server.jar";
 
         public bool Connected { get; private set; }

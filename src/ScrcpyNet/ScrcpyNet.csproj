@@ -4,18 +4,11 @@
         <TargetFramework>netstandard2.1</TargetFramework>
         <LangVersion>8.0</LangVersion>
         <Nullable>enable</Nullable>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FFmpeg.AutoGen" Version="4.3.1" />
+        <PackageReference Include="FFmpeg.AutoGen" Version="4.4.1" />
         <PackageReference Include="Serilog" Version="2.10.0" />
         <PackageReference Include="SharpAdbClient" Version="2.3.23" />
         <PackageReference Include="System.Buffers" Version="4.5.1" />

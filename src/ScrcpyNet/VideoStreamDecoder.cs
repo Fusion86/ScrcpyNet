@@ -207,7 +207,7 @@ namespace ScrcpyNet
                         if (lastFrame != null && !dontDisposeLastFrame)
                         {
                             // We don't have to dispose it, but then the GC will remove all old frames after 'some time'.
-                            // On my 32GB RAM computer the GC allowed the app to use up to 8GB before cleanup it up.
+                            // On my 32GB RAM computer the GC allowed the app to use up to 8GB before cleaning it up.
                             lastFrame.Dispose();
                         }
                         dontDisposeLastFrame = false;
