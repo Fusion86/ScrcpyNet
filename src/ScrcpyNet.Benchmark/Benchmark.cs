@@ -7,14 +7,13 @@ namespace ScrcpyNet.Benchmark
 {
     [SimpleJob(RuntimeMoniker.CoreRt30)]
     [SimpleJob(RuntimeMoniker.CoreRt31)]
-    [SimpleJob(RuntimeMoniker.NetCoreApp50)]
+    [SimpleJob(RuntimeMoniker.Net50)]
     public class Benchmark
     {
         [GlobalSetup]
         public void GlobalSetup()
         {
-            // HACK:
-            ffmpeg.RootPath = "L:/Sources/ffmpeg-4.3.2-2021-02-02-full_build-shared/bin";
+            ffmpeg.RootPath = "ScrcpyNet";
         }
 
         [Benchmark]

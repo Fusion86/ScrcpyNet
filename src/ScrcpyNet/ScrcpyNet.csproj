@@ -15,4 +15,16 @@
         <PackageReference Include="System.Memory" Version="4.5.4" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Content Include="../../deps/shared/*.*" Visible="False">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <LinkBase>ScrcpyNet</LinkBase>
+        </Content>
+
+        <Content Include="../../deps/win64/*.*" Condition="$([MSBuild]::IsOSPlatform('Windows'))" Visible="False">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <LinkBase>ScrcpyNet</LinkBase>
+        </Content>
+    </ItemGroup>
+
 </Project>

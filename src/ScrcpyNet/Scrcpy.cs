@@ -20,7 +20,7 @@ namespace ScrcpyNet
         public int Width { get; set; }
         public int Height { get; set; }
         public long Bitrate { get; set; } = 8000000;
-        public string ScrcpyServerFile { get; set; } = "scrcpy-server.jar";
+        public string ScrcpyServerFile { get; set; } = "ScrcpyNet/scrcpy-server.jar";
 
         public bool Connected { get; private set; }
         public VideoStreamDecoder VideoStreamDecoder { get; }
