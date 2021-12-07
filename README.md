@@ -26,24 +26,8 @@ _This screenshot was taken before I clicked "Accept" on my phone, make sure to d
 
 ## Setup
 
-You'll need to manually install de ffmpeg binaries and the `scrpy-server.jar` file.  
-These files should be in the same folder as the `ScrcpyNet.Avalonia.Sample.exe` file.
-
-### FFMPEG Libraries
-
-You can download the ffmpeg binaries from [here](https://www.gyan.dev/ffmpeg/builds/).  
-You need to download the `ffmpeg-release-full-shared.7z` file.  
-Extract all files .dll from the `bin` folder in the application root.
-
-### scrcpy-server.jar
-
-You'll need to download the `scrcpy-server-v1.17` file from [here](https://github.com/Genymobile/scrcpy/releases/tag/v1.17).  
-Rename this file to `scrcpy-server.jar` and place it in the application root.
-
-Example:  
-_I couldn't fit all .dlls in this screenshot (e.g. swscale-5.dll), but you also need those.  
-So make sure to extract all `*.dll` files from the `bin` directory inside `ffmpeg-release-full-shared.7z`_
-![image](https://user-images.githubusercontent.com/4460428/114621567-24773700-9cad-11eb-811c-ad48a352e9ab.png)
+The ScrcpyNet library should automatically copy the files from the deps/{shared,win64} folder to the ScrcpyNet folder inside your bin folder.
+If for some reason this doesn't happen then you can manually copy those files to a ScrcpyNet folder next to your executable. 
 
 ## Notes
 

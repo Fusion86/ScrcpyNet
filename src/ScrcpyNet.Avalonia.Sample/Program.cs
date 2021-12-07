@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.ReactiveUI;
+using FFmpeg.AutoGen;
 using Serilog;
 
 namespace ScrcpyNet.Avalonia.Sample
@@ -11,6 +12,8 @@ namespace ScrcpyNet.Avalonia.Sample
         // yet and stuff might break.
         public static void Main(string[] args)
         {
+            ffmpeg.RootPath = "ScrcpyNet";
+
             Log.Logger = new LoggerConfiguration()
                 //.MinimumLevel.Verbose()
                 .WriteTo.Console()

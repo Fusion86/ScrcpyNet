@@ -6,6 +6,8 @@ using Serilog;
 using SharpAdbClient;
 using System;
 using System.Reactive;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 namespace ScrcpyNet.Avalonia.Sample.ViewModels
 {
@@ -24,7 +26,15 @@ namespace ScrcpyNet.Avalonia.Sample.ViewModels
 
             LoadAvailableDevicesCommand = ReactiveCommand.Create(LoadAvailableDevices);
 
-            LoadAvailableDevicesCommand.Execute().Subscribe();
+            Task.Run(async () =>
+            {
+                // Start ADB server if needed
+                var srv = new AdbServer();
+                if (!srv.GetStatus().IsRunning)
+                    srv.StartServer("ScrcpyNet/adb.exe", false);
+
+                await LoadAvailableDevicesCommand.Execute();
+            });
         }
 
         private void LoadAvailableDevices()
