@@ -71,6 +71,9 @@ namespace ScrcpyNet.Wpf
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
         {
+            // For some reason WPF doesn't focus the control on click??
+            Focus();
+
             if (Scrcpy != null && renderTarget != null)
             {
                 var point = e.GetPosition(renderTarget);
@@ -120,16 +123,33 @@ namespace ScrcpyNet.Wpf
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
-            log.Error("OnKeyDown");
+            if (Scrcpy != null)
+            {
+                e.Handled = true;
+
+                var msg = new KeycodeControlMessage();
+                msg.KeyCode = KeycodeHelper.ConvertKey(e.Key);
+                msg.Metastate = KeycodeHelper.ConvertModifiers(e.KeyboardDevice.Modifiers);
+                Scrcpy.SendControlCommand(msg);
+            }
 
             base.OnKeyDown(e);
         }
 
-        protected override void OnPreviewKeyDown(KeyEventArgs e)
+        protected override void OnKeyUp(KeyEventArgs e)
         {
-            log.Error("OnPreviewKeyDown");
+            if (Scrcpy != null)
+            {
+                e.Handled = true;
 
-            base.OnPreviewKeyDown(e);
+                var msg = new KeycodeControlMessage();
+                msg.Action = AndroidKeyeventAction.AKEY_EVENT_ACTION_UP;
+                msg.KeyCode = KeycodeHelper.ConvertKey(e.Key);
+                msg.Metastate = KeycodeHelper.ConvertModifiers(e.KeyboardDevice.Modifiers);
+                Scrcpy.SendControlCommand(msg);
+            }
+
+            base.OnKeyUp(e);
         }
 
         protected void SendTouchCommand(AndroidMotioneventAction action, Point position)

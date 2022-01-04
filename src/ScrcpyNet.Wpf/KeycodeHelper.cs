@@ -16,6 +16,7 @@ namespace ScrcpyNet.Wpf
             { Key.Down, AndroidKeycode.AKEYCODE_DPAD_DOWN },
             { Key.Delete, AndroidKeycode.AKEYCODE_FORWARD_DEL },
             { Key.Tab, AndroidKeycode.AKEYCODE_TAB },
+            { Key.Enter, AndroidKeycode.AKEYCODE_ENTER },
         };
 
         public static AndroidKeycode ConvertKey(Key key)

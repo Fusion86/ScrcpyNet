@@ -28,13 +28,5 @@ namespace ScrcpyNet.Sample.Wpf
 
             base.OnClosing(e);
         }
-
-        //protected override void OnClosed(EventArgs e)
-        //{
-        //    base.OnClosed(e);
-
-        //    if (DataContext is MainWindowViewModel vm)
-        //        vm.Scrcpy.DisconnectCommand.Execute().Subscribe();
-        //}
     }
 }
