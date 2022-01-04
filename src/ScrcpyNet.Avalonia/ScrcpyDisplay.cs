@@ -7,7 +7,6 @@ using Avalonia.Rendering;
 using Avalonia.Threading;
 using Serilog;
 using System;
-using System.Diagnostics;
 using AvaloniaPlatform = Avalonia.Platform;
 
 using AVPoint = Avalonia.Point;
@@ -16,6 +15,8 @@ namespace ScrcpyNet.Avalonia
 {
     public class ScrcpyDisplay : TemplatedControl
     {
+        private static readonly ILogger log = Log.ForContext<ScrcpyDisplay>();
+
         public static readonly DirectProperty<ScrcpyDisplay, Scrcpy?> ScrcpyProperty =
             AvaloniaProperty.RegisterDirect<ScrcpyDisplay, Scrcpy?>(
                 nameof(Scrcpy),
@@ -59,7 +60,6 @@ namespace ScrcpyNet.Avalonia
 
         private unsafe void OnFrame(object sender, FrameData frameData)
         {
-            var sw = Stopwatch.StartNew();
             if (renderTarget != null)
             {
                 if (bmp == null || bmp.Size.Width != frameData.Width || bmp.Size.Height != frameData.Height)
@@ -181,6 +181,8 @@ namespace ScrcpyNet.Avalonia
                 msg.Position.ScreenSize.Height = (ushort)renderTarget.Bounds.Height;
                 TouchHelper.ScaleToScreenSize(ref msg.Position, scrcpy.Width, scrcpy.Height);
                 scrcpy.SendControlCommand(msg);
+
+                log.Debug("Sending {Action} for position {PositionX}, {PositionY}", action, msg.Position.Point.X, msg.Position.Point.Y);
             }
         }
 

@@ -1,4 +1,4 @@
-﻿namespace ScrcpyNet.Avalonia
+﻿namespace ScrcpyNet
 {
     public static class TouchHelper
     {

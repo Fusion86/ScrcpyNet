@@ -4,7 +4,7 @@ using SharpAdbClient;
 using System;
 using System.Reactive;
 
-namespace ScrcpyNet.Avalonia.Sample.ViewModels
+namespace ScrcpyNet.Sample.ViewModels
 {
     public class ScrcpyViewModel : ViewModelBase
     {
@@ -19,6 +19,8 @@ namespace ScrcpyNet.Avalonia.Sample.ViewModels
 
         public ScrcpyViewModel()
         {
+            // `outputScheduler: RxApp.TaskpoolScheduler` is only needed for the WPF frontend
+            // TODO: This code only works ONCE. Aka you can't reconnect after disconnecting.
             ConnectCommand = ReactiveCommand.Create<DeviceData>(Connect);
             DisconnectCommand = ReactiveCommand.Create(Disconnect);
         }

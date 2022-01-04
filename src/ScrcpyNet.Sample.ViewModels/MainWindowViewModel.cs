@@ -1,4 +1,3 @@
-using Avalonia.Controls;
 using DynamicData.Binding;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -9,7 +8,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 
-namespace ScrcpyNet.Avalonia.Sample.ViewModels
+namespace ScrcpyNet.Sample.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {

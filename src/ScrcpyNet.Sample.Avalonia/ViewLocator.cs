@@ -1,9 +1,9 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using ScrcpyNet.Avalonia.Sample.ViewModels;
+using ScrcpyNet.Sample.ViewModels;
 using System;
 
-namespace ScrcpyNet.Avalonia.Sample
+namespace ScrcpyNet.Sample.Avalonia
 {
     public class ViewLocator : IDataTemplate
     {

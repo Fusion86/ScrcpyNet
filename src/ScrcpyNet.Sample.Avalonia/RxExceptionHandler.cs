@@ -4,7 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Reactive.Concurrency;
 
-namespace ScrcpyNet.Avalonia.Sample
+namespace ScrcpyNet.Sample.Avalonia
 {
     // I think this catches unhandled exceptions and then logs and throws them, but honestly I'm not sure.
     public class RxExceptionHandler : IObserver<Exception>

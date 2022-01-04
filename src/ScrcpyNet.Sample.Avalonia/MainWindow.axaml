@@ -1,15 +1,15 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:ScrcpyNet.Avalonia.Sample.ViewModels"
+        xmlns:vm="using:ScrcpyNet.Sample.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:scrcpy="using:ScrcpyNet.Avalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="ScrcpyNet.Avalonia.Sample.Views.MainWindow"
+        x:Class="ScrcpyNet.Sample.Avalonia.MainWindow"
         x:CompileBindings="True"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="ScrcpyNet.Avalonia.Sample">
+        Title="ScrcpyNet.Sample.Avalonia">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>

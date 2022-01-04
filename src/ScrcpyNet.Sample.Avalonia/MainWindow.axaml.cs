@@ -1,10 +1,10 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using ScrcpyNet.Avalonia.Sample.ViewModels;
+using ScrcpyNet.Sample.ViewModels;
 using System;
 
-namespace ScrcpyNet.Avalonia.Sample.Views
+namespace ScrcpyNet.Sample.Avalonia
 {
     public class MainWindow : Window
     {

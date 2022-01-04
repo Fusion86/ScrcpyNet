@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31005.135
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScrcpyNet.Test", "src\ScrcpyNet.Test\ScrcpyNet.Test.csproj", "{999CA3C6-BF00-4FC6-AB2E-9AB4A09F3406}"
 EndProject
@@ -11,7 +11,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScrcpyNet.Benchmark", "src\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScrcpyNet.Avalonia", "src\ScrcpyNet.Avalonia\ScrcpyNet.Avalonia.csproj", "{890EC608-4421-40B6-AE80-32472A46850B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScrcpyNet.Avalonia.Sample", "src\ScrcpyNet.Avalonia.Sample\ScrcpyNet.Avalonia.Sample.csproj", "{C377200A-CA4E-49F0-98AC-5496FEC258C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScrcpyNet.Sample.Avalonia", "src\ScrcpyNet.Sample.Avalonia\ScrcpyNet.Sample.Avalonia.csproj", "{C377200A-CA4E-49F0-98AC-5496FEC258C1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScrcpyNet.Sample.Wpf", "src\ScrcpyNet.Sample.Wpf\ScrcpyNet.Sample.Wpf.csproj", "{A566A2CE-A339-4FA2-885B-FF78801726FF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScrcpyNet.Sample.ViewModels", "src\ScrcpyNet.Sample.ViewModels\ScrcpyNet.Sample.ViewModels.csproj", "{EC9F9A4D-1A7E-489D-B707-7B6278FED11D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScrcpyNet.Wpf", "src\ScrcpyNet.Wpf\ScrcpyNet.Wpf.csproj", "{A524932E-FC5D-4A4C-A8C8-215F298CA01C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +45,18 @@ Global
 		{C377200A-CA4E-49F0-98AC-5496FEC258C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C377200A-CA4E-49F0-98AC-5496FEC258C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C377200A-CA4E-49F0-98AC-5496FEC258C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A566A2CE-A339-4FA2-885B-FF78801726FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A566A2CE-A339-4FA2-885B-FF78801726FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A566A2CE-A339-4FA2-885B-FF78801726FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A566A2CE-A339-4FA2-885B-FF78801726FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC9F9A4D-1A7E-489D-B707-7B6278FED11D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC9F9A4D-1A7E-489D-B707-7B6278FED11D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC9F9A4D-1A7E-489D-B707-7B6278FED11D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC9F9A4D-1A7E-489D-B707-7B6278FED11D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A524932E-FC5D-4A4C-A8C8-215F298CA01C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A524932E-FC5D-4A4C-A8C8-215F298CA01C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A524932E-FC5D-4A4C-A8C8-215F298CA01C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A524932E-FC5D-4A4C-A8C8-215F298CA01C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

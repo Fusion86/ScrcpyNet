@@ -1,6 +1,6 @@
 using ReactiveUI;
 
-namespace ScrcpyNet.Avalonia.Sample.ViewModels
+namespace ScrcpyNet.Sample.ViewModels
 {
     public class ViewModelBase : ReactiveObject
     {

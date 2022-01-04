@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net5.0-windows</TargetFramework>
+		<Version>0.0.1</Version>
+		<LangVersion>8.0</LangVersion>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\ScrcpyNet\ScrcpyNet.csproj" />
+	</ItemGroup>
+
+</Project>

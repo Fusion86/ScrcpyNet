@@ -1,5 +1,4 @@
-﻿using ScrcpyNet.Extensions;
-using Serilog;
+﻿using Serilog;
 using SharpAdbClient;
 using System;
 using System.Buffers;
@@ -86,8 +85,8 @@ namespace ScrcpyNet
 
             cts = new CancellationTokenSource();
 
-            videoThread = new Thread(VideoMain);
-            controlThread = new Thread(ControllerMain);
+            videoThread = new Thread(VideoMain) { Name = "ScrcpyNet Video" };
+            controlThread = new Thread(ControllerMain) { Name = "ScrcpyNet Controller" };
 
             videoThread.Start();
             controlThread.Start();
@@ -104,6 +103,8 @@ namespace ScrcpyNet
                 throw new Exception("Not connected.");
 
             cts?.Cancel();
+
+            // TODO: Somehow the videoThread doesn't always stop when requested.
             videoThread?.Join();
             controlThread?.Join();
             listener?.Stop();
@@ -189,7 +190,7 @@ namespace ScrcpyNet
                 var pos = 0;
                 var bytesToRead = packetSize;
 
-                while (bytesToRead != 0)
+                while (bytesToRead != 0 && !cts.Token.IsCancellationRequested)
                 {
                     bytesRead = videoStream.Read(packetBuf, pos, bytesToRead);
 
@@ -200,12 +201,14 @@ namespace ScrcpyNet
                     bytesToRead -= bytesRead;
                 }
 
-                //Log.Verbose($"Presentation Time: {presentationTimeUs}us, PacketSize: {packetSize} bytes");
-                VideoStreamDecoder?.Decode(packetBuf, presentationTimeUs);
+                if (!cts.Token.IsCancellationRequested)
+                {
+                    //Log.Verbose($"Presentation Time: {presentationTimeUs}us, PacketSize: {packetSize} bytes");
+                    VideoStreamDecoder?.Decode(packetBuf, presentationTimeUs);
+                    Log.Verbose("Received and decoded a packet in {@ElapsedMilliseconds} ms", sw.ElapsedMilliseconds);
+                }
 
-                Log.Verbose("Received and decoded a packet in {@ElapsedMilliseconds} ms", sw.ElapsedMilliseconds);
                 sw.Stop();
-
 
                 pool.Return(packetBuf);
             }
