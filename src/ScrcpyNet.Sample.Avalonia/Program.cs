@@ -14,8 +14,9 @@ namespace ScrcpyNet.Sample.Avalonia
         {
             ffmpeg.RootPath = "ScrcpyNet";
 
+            // Enabling debug logging completely obliterates performance
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
+                //.MinimumLevel.Debug()
                 .WriteTo.Console()
                 .WriteTo.Debug()
                 .CreateLogger();
