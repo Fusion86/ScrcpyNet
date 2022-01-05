@@ -1,0 +1,17 @@
+<Project>
+
+    <PropertyGroup>
+        <Authors>Fusion86</Authors>
+        <Company>Fusion86</Company>
+        <Deterministic>true</Deterministic>
+        <LangVersion>8.0</LangVersion>
+        <Nullable>enable</Nullable>
+
+        <!-- Packages should include ../build/Package.props which overrides this property. -->
+        <IsPackable>false</IsPackable>
+
+        <!-- This needs to be set at the top level. -->
+        <PackageOutputPath Condition="'$(PackageOutputPath)' == ''">$(MSBuildThisFileDirectory)artifacts/nuget</PackageOutputPath>
+    </PropertyGroup>
+
+</Project>

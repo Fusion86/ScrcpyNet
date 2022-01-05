@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+    <Import Project="../../build/Package.props" />
+
 	<PropertyGroup>
 		<TargetFramework>net5.0-windows</TargetFramework>
 		<Version>0.0.1</Version>
-		<LangVersion>8.0</LangVersion>
-		<Nullable>enable</Nullable>
-		<UseWPF>true</UseWPF>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<UseWPF>true</UseWPF>
 	</PropertyGroup>
 
 	<ItemGroup>

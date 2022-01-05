@@ -59,12 +59,13 @@ namespace ScrcpyNet.Wpf
         public Scrcpy Scrcpy
         {
             get => (Scrcpy)GetValue(ScrcpyProperty);
-            set => SetValue(ScrcpyProperty, Scrcpy);
+            set => SetValue(ScrcpyProperty, value);
         }
 
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
+
             if (GetTemplateChild("PART_RenderTargetImage") is Image img)
                 renderTarget = img;
         }
