@@ -2,7 +2,7 @@
 {
     public static class TouchHelper
     {
-        public static void ScaleToScreenSize(ref Position position, int width, int height)
+        public static void ScaleToScreenSize(Position position, int width, int height)
         {
             // Lets assume that the scale on the X/Y is the same.
             double scale = (double)width / position.ScreenSize.Width;

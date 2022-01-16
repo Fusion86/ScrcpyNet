@@ -105,7 +105,7 @@ namespace ScrcpyNet.Avalonia
                 e.Handled = true;
 
                 var msg = new KeycodeControlMessage();
-                msg.Action = AndroidKeyeventAction.AKEY_EVENT_ACTION_UP;
+                msg.Action = AndroidKeyEventAction.AKEY_EVENT_ACTION_UP;
                 msg.KeyCode = KeycodeHelper.ConvertKey(e.Key);
                 msg.Metastate = KeycodeHelper.ConvertModifiers(e.KeyModifiers);
                 scrcpy.SendControlCommand(msg);
@@ -123,14 +123,14 @@ namespace ScrcpyNet.Avalonia
                 if (point.Properties.IsRightButtonPressed)
                 {
                     e.Handled = true;
-                    var msg = new BackOrScreenOnControlMessage();
-                    scrcpy.SendControlCommand(msg);
+                    scrcpy.SendControlCommand(new BackOrScreenOnControlMessage() { Action = AndroidKeyEventAction.AKEY_EVENT_ACTION_DOWN });
+                    scrcpy.SendControlCommand(new BackOrScreenOnControlMessage() { Action = AndroidKeyEventAction.AKEY_EVENT_ACTION_UP });
                 }
                 else if (point.Properties.IsLeftButtonPressed)
                 {
                     e.Handled = true;
                     isTouching = true;
-                    SendTouchCommand(AndroidMotioneventAction.AMOTION_EVENT_ACTION_DOWN, point.Position);
+                    SendTouchCommand(AndroidMotionEventAction.AMOTION_EVENT_ACTION_DOWN, point.Position);
                 }
             }
 
@@ -147,7 +147,7 @@ namespace ScrcpyNet.Avalonia
                 {
                     e.Handled = true;
                     isTouching = false;
-                    SendTouchCommand(AndroidMotioneventAction.AMOTION_EVENT_ACTION_UP, point.Position);
+                    SendTouchCommand(AndroidMotionEventAction.AMOTION_EVENT_ACTION_UP, point.Position);
                 }
             }
 
@@ -162,14 +162,14 @@ namespace ScrcpyNet.Avalonia
 
                 if (isTouching && point.Position.X >= 0 && point.Position.Y >= 0)
                 {
-                    SendTouchCommand(AndroidMotioneventAction.AMOTION_EVENT_ACTION_MOVE, point.Position);
+                    SendTouchCommand(AndroidMotionEventAction.AMOTION_EVENT_ACTION_MOVE, point.Position);
                 }
             }
 
             base.OnPointerMoved(e);
         }
 
-        protected void SendTouchCommand(AndroidMotioneventAction action, AVPoint position)
+        protected void SendTouchCommand(AndroidMotionEventAction action, AVPoint position)
         {
             if (scrcpy != null && renderTarget != null)
             {
@@ -179,7 +179,7 @@ namespace ScrcpyNet.Avalonia
                 msg.Position.Point.Y = (int)position.Y;
                 msg.Position.ScreenSize.Width = (ushort)renderTarget.Bounds.Width;
                 msg.Position.ScreenSize.Height = (ushort)renderTarget.Bounds.Height;
-                TouchHelper.ScaleToScreenSize(ref msg.Position, scrcpy.Width, scrcpy.Height);
+                TouchHelper.ScaleToScreenSize(msg.Position, scrcpy.Width, scrcpy.Height);
                 scrcpy.SendControlCommand(msg);
 
                 log.Debug("Sending {Action} for position {PositionX}, {PositionY}", action, msg.Position.Point.X, msg.Position.Point.Y);

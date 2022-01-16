@@ -2,7 +2,7 @@
 
 namespace ScrcpyNet
 {
-    public enum AndroidKeyeventAction : byte
+    public enum AndroidKeyEventAction : byte
     {
         /** The key has been pressed down. */
         AKEY_EVENT_ACTION_DOWN = 0,
@@ -76,7 +76,7 @@ namespace ScrcpyNet
         AMETA_SCROLL_LOCK_ON = 0x400000,
     }
 
-    public enum AndroidMotioneventAction
+    public enum AndroidMotionEventAction
     {
         /** Bit mask of the parts of the action code that are the action itself. */
         AMOTION_EVENT_ACTION_MASK = 0xff,
@@ -160,7 +160,7 @@ namespace ScrcpyNet
         AMOTION_EVENT_ACTION_BUTTON_RELEASE = 12,
     };
 
-    public enum AndroidMotioneventButtons : int
+    public enum AndroidMotionEventButtons : int
     {
         /** primary */
         AMOTION_EVENT_BUTTON_PRIMARY = 1 << 0,

@@ -5,35 +5,37 @@ namespace ScrcpyNet
 {
     public enum ControlMessageType : byte
     {
-        ControlMsgTypeInjectKeycode,
-        ControlMsgTypeInjectText,
-        ControlMsgTypeInjectTouchEvent,
-        ControlMsgTypeInjectScrollEvent,
-        ControlMsgTypeBackOrScreenOn,
-        ControlMsgTypeExpandNotificationPanel,
-        ControlMsgTypeCollapseNotificationPanel,
-        ControlMsgTypeGetClipboard,
-        ControlMsgTypeSetClipboard,
-        ControlMsgTypeSetScreenPowerMode,
-        ControlMsgTypeRotateDevice,
+        InjectKeycode,
+        InjectText,
+        InjectTouchEvent,
+        InjectScrollEvent,
+        BackOrScreenOn,
+        ExpandNotificationPanel,
+        ExpandSettingsPanel,
+        CollapsePanels,
+        GetClipboard,
+        SetClipboard,
+        SetScreenPowerMode,
+        RotateDevice,
     }
 
-    public struct ScreenSize
+    public record ScreenSize
     {
         public ushort Width;
         public ushort Height;
     }
 
-    public struct Point
+    public record Point
     {
         public int X;
         public int Y;
     }
 
-    public struct Position
+    // Not sure whether to use struct, record, or class for this.
+    public record Position
     {
-        public ScreenSize ScreenSize;
-        public Point Point;
+        public ScreenSize ScreenSize = new();
+        public Point Point = new();
     }
 
     public interface IControlMessage
@@ -45,11 +47,11 @@ namespace ScrcpyNet
 
     public class KeycodeControlMessage : IControlMessage
     {
-        public ControlMessageType Type => ControlMessageType.ControlMsgTypeInjectKeycode;
-        public AndroidKeyeventAction Action;
-        public AndroidKeycode KeyCode;
-        public uint Repeat;
-        public AndroidMetastate Metastate;
+        public ControlMessageType Type => ControlMessageType.InjectKeycode;
+        public AndroidKeyEventAction Action { get; set; }
+        public AndroidKeycode KeyCode { get; set; }
+        public uint Repeat { get; set; }
+        public AndroidMetastate Metastate { get; set; }
 
         public Span<byte> ToBytes()
         {
@@ -65,23 +67,25 @@ namespace ScrcpyNet
 
     public class BackOrScreenOnControlMessage : IControlMessage
     {
-        public ControlMessageType Type => ControlMessageType.ControlMsgTypeBackOrScreenOn;
+        public ControlMessageType Type => ControlMessageType.BackOrScreenOn;
+        public AndroidKeyEventAction Action { get; set; }
 
         public Span<byte> ToBytes()
         {
-            Span<byte> b = new byte[1];
+            Span<byte> b = new byte[2];
             b[0] = (byte)Type;
+            b[1] = (byte)Action;
             return b;
         }
     }
 
     public class TouchEventControlMessage : IControlMessage
     {
-        public ControlMessageType Type => ControlMessageType.ControlMsgTypeInjectTouchEvent;
-        public AndroidMotioneventAction Action;
-        public AndroidMotioneventButtons Buttons = AndroidMotioneventButtons.AMOTION_EVENT_BUTTON_PRIMARY;
-        public ulong PointerId = 0xFFFFFFFFFFFFFFFF;
-        public Position Position;
+        public ControlMessageType Type => ControlMessageType.InjectTouchEvent;
+        public AndroidMotionEventAction Action { get; set; }
+        public AndroidMotionEventButtons Buttons { get; set; } = AndroidMotionEventButtons.AMOTION_EVENT_BUTTON_PRIMARY;
+        public ulong PointerId { get; set; } = 0xFFFFFFFFFFFFFFFF;
+        public Position Position { get; set; } = new();
         //public float Pressure { get; set; }
 
         public Span<byte> ToBytes()

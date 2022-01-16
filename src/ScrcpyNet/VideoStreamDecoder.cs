@@ -85,7 +85,7 @@ namespace ScrcpyNet
 
         private bool disposed;
         private int lastFrameRefCount;
-        private readonly object lastFrameLock = new object();
+        private readonly object lastFrameLock = new();
         private SwsContext* swsContext = null;
         private FrameData? lastFrame;
 
@@ -170,7 +170,7 @@ namespace ScrcpyNet
                     fixed (byte* ptr = errorMessageBytes)
                     {
                         ffmpeg.av_strerror(ret, ptr, (ulong)errorMessageBytes.Length);
-                        string errorMessage = new string((sbyte*)ptr, 0, errorMessageBytes.Length - 1, Encoding.ASCII);
+                        string errorMessage = new((sbyte*)ptr, 0, errorMessageBytes.Length - 1, Encoding.ASCII);
                         log.Error("Error sending a packet for decoding. {@ErrorMessage}", errorMessage);
                     }
 
@@ -199,7 +199,7 @@ namespace ScrcpyNet
                     byte* destBufferPtr = (byte*)ffmpeg.av_malloc((ulong)destSize);
                     byte*[] dest = { destBufferPtr };
 
-                    // TODO: Might have a small leak here.
+                    // This `free`s the old context if needed, so there is no leak here.
                     swsContext = ffmpeg.sws_getCachedContext(swsContext, frame->width, frame->height, ctx->pix_fmt, frame->width, frame->height, AVPixelFormat.AV_PIX_FMT_BGRA, ffmpeg.SWS_BICUBIC, null, null, null);
 
                     if (swsContext == null) throw new Exception("Couldn't allocate SwsContext.");

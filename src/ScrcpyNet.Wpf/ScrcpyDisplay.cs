@@ -82,13 +82,13 @@ namespace ScrcpyNet.Wpf
                 if (e.RightButton == MouseButtonState.Pressed)
                 {
                     e.Handled = true;
-                    var msg = new BackOrScreenOnControlMessage();
-                    Scrcpy.SendControlCommand(msg);
+                    Scrcpy.SendControlCommand(new BackOrScreenOnControlMessage() { Action = AndroidKeyEventAction.AKEY_EVENT_ACTION_DOWN });
+                    Scrcpy.SendControlCommand(new BackOrScreenOnControlMessage() { Action = AndroidKeyEventAction.AKEY_EVENT_ACTION_UP });
                 }
                 else if (e.LeftButton == MouseButtonState.Pressed)
                 {
                     e.Handled = true;
-                    SendTouchCommand(AndroidMotioneventAction.AMOTION_EVENT_ACTION_DOWN, new Point { X = (int)point.X, Y = (int)point.Y });
+                    SendTouchCommand(AndroidMotionEventAction.AMOTION_EVENT_ACTION_DOWN, new Point { X = (int)point.X, Y = (int)point.Y });
                 }
             }
 
@@ -101,7 +101,7 @@ namespace ScrcpyNet.Wpf
             {
                 var point = e.GetPosition(renderTarget);
                 e.Handled = true;
-                SendTouchCommand(AndroidMotioneventAction.AMOTION_EVENT_ACTION_UP, new Point { X = (int)point.X, Y = (int)point.Y });
+                SendTouchCommand(AndroidMotionEventAction.AMOTION_EVENT_ACTION_UP, new Point { X = (int)point.X, Y = (int)point.Y });
             }
 
             base.OnMouseUp(e);
@@ -115,7 +115,7 @@ namespace ScrcpyNet.Wpf
 
                 if (e.LeftButton == MouseButtonState.Pressed && point.X >= 0 && point.Y >= 0)
                 {
-                    SendTouchCommand(AndroidMotioneventAction.AMOTION_EVENT_ACTION_MOVE, new Point { X = (int)point.X, Y = (int)point.Y });
+                    SendTouchCommand(AndroidMotionEventAction.AMOTION_EVENT_ACTION_MOVE, new Point { X = (int)point.X, Y = (int)point.Y });
                 }
             }
 
@@ -144,7 +144,7 @@ namespace ScrcpyNet.Wpf
                 e.Handled = true;
 
                 var msg = new KeycodeControlMessage();
-                msg.Action = AndroidKeyeventAction.AKEY_EVENT_ACTION_UP;
+                msg.Action = AndroidKeyEventAction.AKEY_EVENT_ACTION_UP;
                 msg.KeyCode = KeycodeHelper.ConvertKey(e.Key);
                 msg.Metastate = KeycodeHelper.ConvertModifiers(e.KeyboardDevice.Modifiers);
                 Scrcpy.SendControlCommand(msg);
@@ -153,7 +153,7 @@ namespace ScrcpyNet.Wpf
             base.OnKeyUp(e);
         }
 
-        protected void SendTouchCommand(AndroidMotioneventAction action, Point position)
+        protected void SendTouchCommand(AndroidMotionEventAction action, Point position)
         {
             if (Scrcpy != null && renderTarget != null)
             {
@@ -163,7 +163,7 @@ namespace ScrcpyNet.Wpf
                 msg.Position.Point.Y = position.Y;
                 msg.Position.ScreenSize.Width = (ushort)renderTarget.ActualWidth;
                 msg.Position.ScreenSize.Height = (ushort)renderTarget.ActualHeight;
-                TouchHelper.ScaleToScreenSize(ref msg.Position, Scrcpy.Width, Scrcpy.Height);
+                TouchHelper.ScaleToScreenSize(msg.Position, Scrcpy.Width, Scrcpy.Height);
                 Scrcpy.SendControlCommand(msg);
 
                 log.Debug("Sending {Action} for position {PositionX}, {PositionY}", action, msg.Position.Point.X, msg.Position.Point.Y);
@@ -202,11 +202,11 @@ namespace ScrcpyNet.Wpf
                 }
                 catch (TimeoutException)
                 {
-                    log.Verbose("Ignoring TimeoutException inside OnFrame.");
+                    log.Debug("Ignoring TimeoutException inside OnFrame.");
                 }
                 catch (TaskCanceledException)
                 {
-                    log.Verbose("Ignoring TaskCanceledException inside OnFrame.");
+                    log.Debug("Ignoring TaskCanceledException inside OnFrame.");
                 }
             }
         }

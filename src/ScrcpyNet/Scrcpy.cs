@@ -4,6 +4,7 @@ using System;
 using System.Buffers;
 using System.Buffers.Binary;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -33,7 +34,7 @@ namespace ScrcpyNet
 
         private readonly AdbClient adb;
         private readonly DeviceData device;
-        private readonly ConcurrentQueue<IControlMessage> controlQueue = new ConcurrentQueue<IControlMessage>();
+        private readonly ConcurrentQueue<IControlMessage> controlQueue = new();
         private static readonly ArrayPool<byte> pool = ArrayPool<byte>.Shared;
         private static readonly ILogger log = Log.ForContext<VideoStreamDecoder>();
 
@@ -105,19 +106,17 @@ namespace ScrcpyNet
 
             cts?.Cancel();
 
-            // TODO: Somehow the videoThread doesn't always stop when requested.
             videoThread?.Join();
             controlThread?.Join();
             listener?.Stop();
         }
 
-        // TODO: Implement this
         public void SendControlCommand(IControlMessage msg)
         {
             if (controlClient == null)
-                throw new Exception();
-
-            controlQueue.Enqueue(msg);
+                log.Warning("SendControlCommand() called, but controlClient is null.");
+            else
+                controlQueue.Enqueue(msg);
         }
 
         private void ReadDeviceInfo()
@@ -159,7 +158,7 @@ namespace ScrcpyNet
             int bytesRead = 0;
             var metaBuf = pool.Rent(12);
 
-            Stopwatch sw = new Stopwatch();
+            Stopwatch sw = new();
 
             while (!cts.Token.IsCancellationRequested)
             {
@@ -227,7 +226,7 @@ namespace ScrcpyNet
             {
                 if (controlQueue.TryDequeue(out var cmd))
                 {
-                    log.Verbose("Sending control message: {@ControlMessage}", cmd.Type);
+                    log.Debug("Sending control message: {@ControlMessage}", cmd.Type);
                     var bytes = cmd.ToBytes();
                     stream.Write(bytes);
                 }
@@ -266,13 +265,43 @@ namespace ScrcpyNet
             var cts = new CancellationTokenSource();
             var receiver = new SerilogOutputReceiver();
 
-            string version = "1.17";
+            string version = "1.21";
             int maxFramerate = 0;
-            int orientation = -1; // -1 means allow rotate
-            string control = "true";
-            string showTouches = "false";
-            string stayAwake = "false";
-            string command = $"CLASSPATH=/data/local/tmp/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server {version} debug 0 {Bitrate} {maxFramerate} {orientation} false - true {control} 0 {showTouches} {stayAwake} - -";
+            ScrcpyLockVideoOrientation orientation = ScrcpyLockVideoOrientation.Unlocked; // -1 means allow rotate
+            bool control = true;
+            bool showTouches = false;
+            bool stayAwake = false;
+
+            var cmds = new List<string>
+            {
+                "CLASSPATH=/data/local/tmp/scrcpy-server.jar",
+                "app_process",
+
+                // Unused
+                "/",
+
+                // App entry point, or something like that.
+                "com.genymobile.scrcpy.Server",
+
+                version,
+                "log_level=debug",
+                $"bit_rate={Bitrate}"
+            };
+
+            if (maxFramerate != 0)
+                cmds.Add($"max_fps={maxFramerate}");
+
+            if (orientation != ScrcpyLockVideoOrientation.Unlocked)
+                cmds.Add($"lock_video_orientation={(int)orientation}");
+
+            cmds.Add("tunnel_forward=false");
+            //cmds.Add("crop=-");
+            cmds.Add($"control={control}");
+            cmds.Add("display_id=0");
+            cmds.Add($"show_touches={showTouches}");
+            cmds.Add($"stay_awake={stayAwake}");
+
+            string command = string.Join(" ", cmds);
 
             log.Information("Start command: " + command);
             _ = adb.ExecuteRemoteCommandAsync(command, device, receiver, cts.Token);
@@ -280,7 +309,7 @@ namespace ScrcpyNet
 
         private void UploadMobileServer()
         {
-            using SyncService service = new SyncService(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)), device);
+            using SyncService service = new(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)), device);
             using Stream stream = File.OpenRead(ScrcpyServerFile);
             service.Push(stream, "/data/local/tmp/scrcpy-server.jar", 444, DateTime.Now, null, CancellationToken.None);
         }

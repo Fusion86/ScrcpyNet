@@ -6,7 +6,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ScrcpyNet.Sample.Wpf"
         xmlns:vm="clr-namespace:ScrcpyNet.Sample.ViewModels;assembly=ScrcpyNet.Sample.ViewModels"
-        xmlns:scrcpy="clr-namespace:ScrcpyNet.Wpf;assembly=ScrcpyNet.Wpf"
+        xmlns:scrcpy="clr-namespace:ScrcpyNet;assembly=ScrcpyNet"
+        xmlns:scrcpyWpf="clr-namespace:ScrcpyNet.Wpf;assembly=ScrcpyNet.Wpf"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
 
@@ -65,17 +66,39 @@
                         CommandParameter="{Binding SelectedDevice}"/>
             </StackPanel>
 
-            <StackPanel Visibility="{Binding Scrcpy.IsConnected, Converter={StaticResource VisibilityValueConverter}}">
-                <TextBlock Text="Connected device" FontWeight="Bold"/>
-                <TextBlock Text="{Binding Scrcpy.DeviceName}" Margin="0,4,0,0"/>
+            <DockPanel Visibility="{Binding Scrcpy.IsConnected, Converter={StaticResource VisibilityValueConverter}}">
+                <StackPanel DockPanel.Dock="Top">
+                    <TextBlock Text="Connected device" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding Scrcpy.DeviceName}" Margin="0,4,0,0"/>
 
-                <Button Content="Disconnect" Command="{Binding Scrcpy.DisconnectCommand}" Margin="0,4,0,0"/>
-            </StackPanel>
+                    <Button Content="Disconnect" Command="{Binding Scrcpy.DisconnectCommand}" Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <WrapPanel Margin="-2,6,-2,6">
+                    <WrapPanel.Resources>
+                        <Style TargetType="Button">
+                            <Setter Property="Margin" Value="2"/>
+                            <Setter Property="Padding" Value="4,1,4,1"/>
+                            <Setter Property="Command" Value="{Binding Scrcpy.SendKeycodeCommand}"/>
+                        </Style>
+                    </WrapPanel.Resources>
+
+                    <Button Content="Back" CommandParameter="{x:Static scrcpy:AndroidKeycode.AKEYCODE_BACK}"/>
+                    <Button Content="Home" CommandParameter="{x:Static scrcpy:AndroidKeycode.AKEYCODE_HOME}"/>
+                    <Button Content="Tasks" CommandParameter="{x:Static scrcpy:AndroidKeycode.AKEYCODE_APP_SWITCH}"/>
+                    
+                    <!-- TODO: I don't know what message to send to lock the screen. -->
+                    <!--<Button Content="Lock"/>-->
+                    
+                    <Button Content="Vol +" CommandParameter="{x:Static scrcpy:AndroidKeycode.AKEYCODE_VOLUME_UP}"/>
+                    <Button Content="Vol -" CommandParameter="{x:Static scrcpy:AndroidKeycode.AKEYCODE_VOLUME_DOWN}"/>
+                </WrapPanel>
+            </DockPanel>
 
             <!-- TODO: Display errors here (maybe?) -->
             <TextBlock Margin="10" Foreground="Red"/>
         </StackPanel>
 
-        <scrcpy:ScrcpyDisplay Scrcpy="{Binding Scrcpy.Scrcpy}" Grid.Column="1"/>
+        <scrcpyWpf:ScrcpyDisplay Scrcpy="{Binding Scrcpy.Scrcpy}" Grid.Column="1"/>
     </Grid>
 </Window>
