@@ -1,0 +1,4 @@
+﻿[*.{cs,vb}]
+
+# IDE0017: Simplify object initialization
+dotnet_diagnostic.IDE0017.severity = silent

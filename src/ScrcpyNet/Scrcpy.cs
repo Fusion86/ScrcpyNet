@@ -35,6 +35,7 @@ namespace ScrcpyNet
         private readonly DeviceData device;
         private readonly ConcurrentQueue<IControlMessage> controlQueue = new ConcurrentQueue<IControlMessage>();
         private static readonly ArrayPool<byte> pool = ArrayPool<byte>.Shared;
+        private static readonly ILogger log = Log.ForContext<VideoStreamDecoder>();
 
         public Scrcpy(DeviceData device, VideoStreamDecoder? videoStreamDecoder = null)
         {
@@ -73,13 +74,13 @@ namespace ScrcpyNet
             }
 
             videoClient = listener.AcceptTcpClient();
-            Log.Information("Video socket connected.");
+            log.Information("Video socket connected.");
 
             if (!listener.Pending())
                 throw new Exception("Server is not sending a second connection request. Is 'control' disabled?");
 
             controlClient = listener.AcceptTcpClient();
-            Log.Information("Control socket connected.");
+            log.Information("Control socket connected.");
 
             ReadDeviceInfo();
 
@@ -136,12 +137,12 @@ namespace ScrcpyNet
 
             // Decode device name from header.
             var deviceInfoSpan = deviceInfoBuf.AsSpan();
-            DeviceName = Encoding.UTF8.GetString(deviceInfoSpan.Slice(0, 64)).TrimEnd(new[] { '\0' });
-            Log.Information("Device name: " + DeviceName);
+            DeviceName = Encoding.UTF8.GetString(deviceInfoSpan[..64]).TrimEnd(new[] { '\0' });
+            log.Information("Device name: " + DeviceName);
 
             Width = BinaryPrimitives.ReadInt16BigEndian(deviceInfoSpan[64..]);
             Height = BinaryPrimitives.ReadInt16BigEndian(deviceInfoSpan[66..]);
-            Log.Information($"{Width}x{Height}");
+            log.Information($"Initial texture: {Width}x{Height}");
 
             pool.Return(deviceInfoBuf);
         }
@@ -205,7 +206,7 @@ namespace ScrcpyNet
                 {
                     //Log.Verbose($"Presentation Time: {presentationTimeUs}us, PacketSize: {packetSize} bytes");
                     VideoStreamDecoder?.Decode(packetBuf, presentationTimeUs);
-                    Log.Verbose("Received and decoded a packet in {@ElapsedMilliseconds} ms", sw.ElapsedMilliseconds);
+                    log.Verbose("Received and decoded a packet in {@ElapsedMilliseconds} ms", sw.ElapsedMilliseconds);
                 }
 
                 sw.Stop();
@@ -226,7 +227,7 @@ namespace ScrcpyNet
             {
                 if (controlQueue.TryDequeue(out var cmd))
                 {
-                    Log.Verbose("Sending control message: {@ControlMessage}", cmd.Type);
+                    log.Verbose("Sending control message: {@ControlMessage}", cmd.Type);
                     var bytes = cmd.ToBytes();
                     stream.Write(bytes);
                 }
@@ -260,7 +261,7 @@ namespace ScrcpyNet
         /// <param name="bitrate"></param>
         private void MobileServerStart()
         {
-            Log.Information("Starting scrcpy server...");
+            log.Information("Starting scrcpy server...");
 
             var cts = new CancellationTokenSource();
             var receiver = new SerilogOutputReceiver();
@@ -273,7 +274,7 @@ namespace ScrcpyNet
             string stayAwake = "false";
             string command = $"CLASSPATH=/data/local/tmp/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server {version} debug 0 {Bitrate} {maxFramerate} {orientation} false - true {control} 0 {showTouches} {stayAwake} - -";
 
-            Log.Information("Start command: " + command);
+            log.Information("Start command: " + command);
             _ = adb.ExecuteRemoteCommandAsync(command, device, receiver, cts.Token);
         }
 

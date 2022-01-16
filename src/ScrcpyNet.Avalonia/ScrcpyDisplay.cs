@@ -38,7 +38,7 @@ namespace ScrcpyNet.Avalonia
 
         public ScrcpyDisplay()
         {
-            AvaloniaLocator.Current.GetService<IRenderTimer>().Tick += RenderTick;
+            AvaloniaLocator.Current.GetService<IRenderTimer>()!.Tick += RenderTick;
         }
 
         public Scrcpy? Scrcpy

@@ -20,14 +20,29 @@
             <StackPanel Spacing="4" IsVisible="{Binding !Scrcpy.IsConnected}">
                 <TextBlock Text="Connect to device" FontWeight="Bold"/>
 
-                <ComboBox Items="{Binding AvailableDevices}"
-                          SelectedItem="{Binding SelectedDevice}">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Product}"/>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
+                <DockPanel>
+                    <Button DockPanel.Dock="Right"
+                            Margin="4,0,0,0"
+                            Command="{Binding LoadAvailableDevicesCommand}">
+                        <Viewbox Width="20" Height="20">
+                            <Path Width="24"
+                                  Height="24"
+                                  Stroke="White"
+                                  StrokeThickness="1.5"
+                                  Data="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </Viewbox>
+                    </Button>
+
+                    <ComboBox Items="{Binding AvailableDevices}"
+                              SelectedItem="{Binding SelectedDevice}"
+                              HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Product}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </DockPanel>
 
                 <NumericUpDown Value="{Binding Scrcpy.Bitrate}"/>
 

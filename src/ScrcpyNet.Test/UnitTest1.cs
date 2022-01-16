@@ -29,7 +29,10 @@ namespace ScrcpyNet.Test
             var device = adb.GetDevices().FirstOrDefault();
 
             if (device == null)
-                Assert.Inconclusive("No device connected.");
+            {
+                Assert.Inconclusive("No device connected."); 
+                return;
+            }
 
             var adc = new Scrcpy(device);
             adc.Start();

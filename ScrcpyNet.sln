@@ -17,7 +17,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScrcpyNet.Sample.Wpf", "src
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScrcpyNet.Sample.ViewModels", "src\ScrcpyNet.Sample.ViewModels\ScrcpyNet.Sample.ViewModels.csproj", "{EC9F9A4D-1A7E-489D-B707-7B6278FED11D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScrcpyNet.Wpf", "src\ScrcpyNet.Wpf\ScrcpyNet.Wpf.csproj", "{A524932E-FC5D-4A4C-A8C8-215F298CA01C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScrcpyNet.Wpf", "src\ScrcpyNet.Wpf\ScrcpyNet.Wpf.csproj", "{A524932E-FC5D-4A4C-A8C8-215F298CA01C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E6488E56-6E4F-4FA7-8A0E-CEC00C4715D4}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

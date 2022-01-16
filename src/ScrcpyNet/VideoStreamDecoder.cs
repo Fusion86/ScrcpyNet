@@ -84,7 +84,8 @@ namespace ScrcpyNet
         public event EventHandler<FrameData>? OnFrame;
 
         private bool disposed;
-        private bool dontDisposeLastFrame;
+        private int lastFrameRefCount;
+        private readonly object lastFrameLock = new object();
         private SwsContext* swsContext = null;
         private FrameData? lastFrame;
 
@@ -93,6 +94,8 @@ namespace ScrcpyNet
         private readonly AVCodecContext* ctx;
         private readonly AVFrame* frame;
         private readonly AVPacket* packet;
+
+        private static readonly ILogger log = Log.ForContext<VideoStreamDecoder>();
 
         public VideoStreamDecoder()
         {
@@ -123,8 +126,11 @@ namespace ScrcpyNet
 
         public FrameData? GetLastFrame()
         {
-            dontDisposeLastFrame = true;
-            return lastFrame;
+            lock (lastFrameLock)
+            {
+                lastFrameRefCount++;
+                return lastFrame;
+            }
         }
 
         public void Decode(byte[] data, long pts = -1)
@@ -165,7 +171,7 @@ namespace ScrcpyNet
                     {
                         ffmpeg.av_strerror(ret, ptr, (ulong)errorMessageBytes.Length);
                         string errorMessage = new string((sbyte*)ptr, 0, errorMessageBytes.Length - 1, Encoding.ASCII);
-                        Log.Error("Error sending a packet for decoding. {@ErrorMessage}", errorMessage);
+                        log.Error("Error sending a packet for decoding. {@ErrorMessage}", errorMessage);
                     }
 
                     return;
@@ -202,15 +208,19 @@ namespace ScrcpyNet
 
                     if (outputSliceHeight > 0)
                     {
-                        // Shitty workaround
-                        // Poor man's reference counting. dontDisposeLastFrame will be set to true when someone calls GetLastFrame()
-                        if (lastFrame != null && !dontDisposeLastFrame)
+                        // Poor man's reference counting.
+                        lock (lastFrameLock)
                         {
-                            // We don't have to dispose it, but then the GC will remove all old frames after 'some time'.
-                            // On my 32GB RAM computer the GC allowed the app to use up to 8GB before cleaning it up.
-                            lastFrame.Dispose();
+                            //if (lastFrame != null && Interlocked.Read(ref lastFrameRefCount) == 0)
+                            if (lastFrame != null && lastFrameRefCount == 0)
+                            {
+                                // We don't have to dispose it, but then the GC will remove all old frames after 'some time'.
+                                // On my 32GB RAM computer the GC allowed the app to use up to 8GB before cleaning it up.
+                                lastFrame.Dispose();
+                            }
+                            //Interlocked.Exchange(ref lastFrameRefCount, 0);
+                            lastFrameRefCount = 0;
                         }
-                        dontDisposeLastFrame = false;
 
                         // FrameData takes ownership of the destBufferPtr and will free it when disposed!
                         lastFrame = new FrameData(destBufferPtr, destSize, frame->width, frame->height, ctx->frame_number, AVPixelFormat.AV_PIX_FMT_BGRA);
@@ -218,7 +228,7 @@ namespace ScrcpyNet
                     }
                     else
                     {
-                        Log.Warning("outputSliceHeight == 0, not sure if this is bad?");
+                        log.Warning("outputSliceHeight == 0, not sure if this is bad?");
 
                         // Manually free the destBufferPtr when we don't create a FrameData object.
                         ffmpeg.av_free(destBufferPtr);
