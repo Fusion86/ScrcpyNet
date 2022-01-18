@@ -56,7 +56,7 @@ namespace ScrcpyNet.Wpf
             DefaultStyleKeyProperty.OverrideMetadata(typeof(ScrcpyDisplay), new FrameworkPropertyMetadata(typeof(ScrcpyDisplay)));
         }
 
-        public Scrcpy Scrcpy
+        public Scrcpy? Scrcpy
         {
             get => (Scrcpy)GetValue(ScrcpyProperty);
             set => SetValue(ScrcpyProperty, value);
@@ -75,10 +75,8 @@ namespace ScrcpyNet.Wpf
             // For some reason WPF doesn't focus the control on click??
             Focus();
 
-            if (Scrcpy != null && renderTarget != null)
+            if (Scrcpy != null)
             {
-                var point = e.GetPosition(renderTarget);
-
                 if (e.RightButton == MouseButtonState.Pressed)
                 {
                     e.Handled = true;
@@ -88,7 +86,7 @@ namespace ScrcpyNet.Wpf
                 else if (e.LeftButton == MouseButtonState.Pressed)
                 {
                     e.Handled = true;
-                    SendTouchCommand(AndroidMotionEventAction.AMOTION_EVENT_ACTION_DOWN, new Point { X = (int)point.X, Y = (int)point.Y });
+                    SendTouchCommand(AndroidMotionEventAction.AMOTION_EVENT_ACTION_DOWN, e);
                 }
             }
 
@@ -97,11 +95,10 @@ namespace ScrcpyNet.Wpf
 
         protected override void OnMouseUp(MouseButtonEventArgs e)
         {
-            if (Scrcpy != null && renderTarget != null)
+            if (Scrcpy != null)
             {
-                var point = e.GetPosition(renderTarget);
                 e.Handled = true;
-                SendTouchCommand(AndroidMotionEventAction.AMOTION_EVENT_ACTION_UP, new Point { X = (int)point.X, Y = (int)point.Y });
+                SendTouchCommand(AndroidMotionEventAction.AMOTION_EVENT_ACTION_UP, e);
             }
 
             base.OnMouseUp(e);
@@ -115,7 +112,8 @@ namespace ScrcpyNet.Wpf
 
                 if (e.LeftButton == MouseButtonState.Pressed && point.X >= 0 && point.Y >= 0)
                 {
-                    SendTouchCommand(AndroidMotionEventAction.AMOTION_EVENT_ACTION_MOVE, new Point { X = (int)point.X, Y = (int)point.Y });
+                    // Do we need to set e.Handled?
+                    SendTouchCommand(AndroidMotionEventAction.AMOTION_EVENT_ACTION_MOVE, e);
                 }
             }
 
@@ -153,21 +151,50 @@ namespace ScrcpyNet.Wpf
             base.OnKeyUp(e);
         }
 
-        protected void SendTouchCommand(AndroidMotionEventAction action, Point position)
+        protected override void OnMouseWheel(MouseWheelEventArgs e)
         {
-            if (Scrcpy != null && renderTarget != null)
+            var pos = GetScrcpyMousePosition(e);
+            if (Scrcpy != null && pos != null)
+            {
+                e.Handled = true;
+
+                var msg = new ScrollEventControlMessage();
+                msg.Position = pos;
+                msg.VerticalScroll = e.Delta / 120; // Random guess
+                msg.HorizontalScroll = 0; // TODO: Can we implement this?
+                Scrcpy.SendControlCommand(msg);
+            }
+
+            base.OnMouseWheel(e);
+        }
+
+        protected void SendTouchCommand(AndroidMotionEventAction action, MouseEventArgs e)
+        {
+            var pos = GetScrcpyMousePosition(e);
+            if (Scrcpy != null && pos != null)
             {
                 var msg = new TouchEventControlMessage();
                 msg.Action = action;
-                msg.Position.Point.X = position.X;
-                msg.Position.Point.Y = position.Y;
-                msg.Position.ScreenSize.Width = (ushort)renderTarget.ActualWidth;
-                msg.Position.ScreenSize.Height = (ushort)renderTarget.ActualHeight;
-                TouchHelper.ScaleToScreenSize(msg.Position, Scrcpy.Width, Scrcpy.Height);
+                msg.Position = pos;
                 Scrcpy.SendControlCommand(msg);
 
                 log.Debug("Sending {Action} for position {PositionX}, {PositionY}", action, msg.Position.Point.X, msg.Position.Point.Y);
             }
+        }
+
+        private Position? GetScrcpyMousePosition(MouseEventArgs e)
+        {
+            if (Scrcpy == null || renderTarget == null) return null;
+
+            var point = e.GetPosition(renderTarget);
+
+            var pos = new Position();
+            pos.Point = new Point { X = (int)point.X, Y = (int)point.Y };
+            pos.ScreenSize.Width = (ushort)renderTarget.ActualWidth;
+            pos.ScreenSize.Height = (ushort)renderTarget.ActualHeight;
+            TouchHelper.ScaleToScreenSize(pos, Scrcpy.Width, Scrcpy.Height);
+
+            return pos;
         }
 
         private unsafe void OnFrame(object? sender, FrameData frameData)

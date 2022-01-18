@@ -36,7 +36,7 @@ namespace ScrcpyNet.Sample.ViewModels
                 {
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     {
-                        srv.StartServer("adb.exe", false);
+                        srv.StartServer("ScrcpyNet/adb.exe", false);
                     }
                     else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                     {

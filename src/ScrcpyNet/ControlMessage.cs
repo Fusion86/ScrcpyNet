@@ -36,6 +36,16 @@ namespace ScrcpyNet
     {
         public ScreenSize ScreenSize = new();
         public Point Point = new();
+
+        public Span<byte> ToBytes()
+        {
+            Span<byte> b = new byte[12];
+            BinaryPrimitives.WriteInt32BigEndian(b[0..], Point.X);
+            BinaryPrimitives.WriteInt32BigEndian(b[4..], Point.Y);
+            BinaryPrimitives.WriteUInt16BigEndian(b[8..], ScreenSize.Width);
+            BinaryPrimitives.WriteUInt16BigEndian(b[10..], ScreenSize.Height);
+            return b;
+        }
     }
 
     public interface IControlMessage
@@ -107,6 +117,24 @@ namespace ScrcpyNet
 
             BinaryPrimitives.WriteInt32BigEndian(b[24..], (int)Buttons);
 
+            return b;
+        }
+    }
+
+    public class ScrollEventControlMessage : IControlMessage
+    {
+        public ControlMessageType Type => ControlMessageType.InjectScrollEvent;
+        public Position Position { get; set; } = new();
+        public int HorizontalScroll { get; set; }
+        public int VerticalScroll { get; set; }
+
+        public Span<byte> ToBytes()
+        {
+            Span<byte> b = new byte[21];
+            b[0] = (byte)Type;
+            Position.ToBytes().CopyTo(b[1..]);
+            BinaryPrimitives.WriteInt32BigEndian(b[13..], HorizontalScroll);
+            BinaryPrimitives.WriteInt32BigEndian(b[17..], VerticalScroll);
             return b;
         }
     }
