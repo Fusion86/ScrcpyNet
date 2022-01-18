@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.ReactiveUI;
 using FFmpeg.AutoGen;
@@ -12,7 +13,14 @@ namespace ScrcpyNet.Sample.Avalonia
         // yet and stuff might break.
         public static void Main(string[] args)
         {
-            ffmpeg.RootPath = "ScrcpyNet";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                ffmpeg.RootPath = "ScrcpyNet";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                ffmpeg.RootPath = "/lib/x86_64-linux-gnu/";
+            }
 
             // Enabling debug logging completely obliterates performance
             Log.Logger = new LoggerConfiguration()

@@ -6,6 +6,7 @@ using SharpAdbClient;
 using System;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace ScrcpyNet.Sample.ViewModels
@@ -19,6 +20,8 @@ namespace ScrcpyNet.Sample.ViewModels
 
         [Reactive] public DeviceData? SelectedDevice { get; set; }
 
+        private static readonly ILogger log = Log.ForContext<MainWindowViewModel>();
+
         public MainWindowViewModel()
         {
             Scrcpy = new ScrcpyViewModel();
@@ -30,7 +33,20 @@ namespace ScrcpyNet.Sample.ViewModels
                 // Start ADB server if needed
                 var srv = new AdbServer();
                 if (!srv.GetStatus().IsRunning)
-                    srv.StartServer("ScrcpyNet/adb.exe", false);
+                {
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
+                        srv.StartServer("adb.exe", false);
+                    }
+                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    {
+                        srv.StartServer("/usr/bin/adb", false);
+                    }
+                    else
+                    {
+                        log.Warning("Can't automatically start the ADB server on this platform.");
+                    }
+                }
 
                 await LoadAvailableDevicesCommand.Execute();
             });
@@ -44,7 +60,7 @@ namespace ScrcpyNet.Sample.ViewModels
             }
             catch (Exception ex)
             {
-                Log.Error("Couldn't load available devices", ex);
+                log.Error("Couldn't load available devices", ex);
             }
         }
     }
