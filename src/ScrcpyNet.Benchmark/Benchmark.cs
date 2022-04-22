@@ -5,9 +5,9 @@ using System.IO;
 
 namespace ScrcpyNet.Benchmark
 {
-    [SimpleJob(RuntimeMoniker.CoreRt30)]
     [SimpleJob(RuntimeMoniker.CoreRt31)]
     [SimpleJob(RuntimeMoniker.Net50)]
+    [SimpleJob(RuntimeMoniker.Net60)]
     public class Benchmark
     {
         [GlobalSetup]

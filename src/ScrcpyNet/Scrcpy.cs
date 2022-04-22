@@ -3,7 +3,6 @@ using SharpAdbClient;
 using System;
 using System.Buffers;
 using System.Buffers.Binary;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -11,6 +10,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Channels;
 
 namespace ScrcpyNet
 {
@@ -34,7 +34,7 @@ namespace ScrcpyNet
 
         private readonly AdbClient adb;
         private readonly DeviceData device;
-        private readonly ConcurrentQueue<IControlMessage> controlQueue = new();
+        private readonly Channel<IControlMessage> controlChannel = Channel.CreateUnbounded<IControlMessage>();
         private static readonly ArrayPool<byte> pool = ArrayPool<byte>.Shared;
         private static readonly ILogger log = Log.ForContext<VideoStreamDecoder>();
 
@@ -116,7 +116,7 @@ namespace ScrcpyNet
             if (controlClient == null)
                 log.Warning("SendControlCommand() called, but controlClient is null.");
             else
-                controlQueue.Enqueue(msg);
+                controlChannel.Writer.TryWrite(msg);
         }
 
         private void ReadDeviceInfo()
@@ -155,7 +155,7 @@ namespace ScrcpyNet
             var videoStream = videoClient.GetStream();
             videoStream.ReadTimeout = 2000;
 
-            int bytesRead = 0;
+            int bytesRead;
             var metaBuf = pool.Rent(12);
 
             Stopwatch sw = new();
@@ -214,7 +214,7 @@ namespace ScrcpyNet
             }
         }
 
-        private void ControllerMain()
+        private async void ControllerMain()
         {
             // Both of these should never happen.
             if (controlClient == null) throw new Exception("controlClient is null.");
@@ -222,15 +222,22 @@ namespace ScrcpyNet
 
             var stream = controlClient.GetStream();
 
-            while (!cts.Token.IsCancellationRequested)
+            try
             {
-                if (controlQueue.TryDequeue(out var cmd))
+                await foreach (var cmd in controlChannel.Reader.ReadAllAsync(cts.Token))
                 {
-                    log.Debug("Sending control message: {@ControlMessage}", cmd.Type);
-                    var bytes = cmd.ToBytes();
-                    stream.Write(bytes);
+                    ControllerSend(stream, cmd);
                 }
             }
+            catch (OperationCanceledException) { }
+        }
+
+        // This needs to be in a separate method, because we can't use a Span<byte> inside an async function.
+        private void ControllerSend(NetworkStream stream, IControlMessage cmd)
+        {
+            log.Debug("Sending control message: {@ControlMessage}", cmd.Type);
+            var bytes = cmd.ToBytes();
+            stream.Write(bytes);
         }
 
         private void MobileServerSetup()
