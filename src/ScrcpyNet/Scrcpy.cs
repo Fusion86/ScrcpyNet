@@ -17,8 +17,8 @@ namespace ScrcpyNet
     public class Scrcpy
     {
         public string DeviceName { get; private set; } = "";
-        public int Width { get; set; }
-        public int Height { get; set; }
+        public int Width { get; internal set; }
+        public int Height { get; internal set; }
         public long Bitrate { get; set; } = 8000000;
         public string ScrcpyServerFile { get; set; } = "ScrcpyNet/scrcpy-server.jar";
 
@@ -272,7 +272,7 @@ namespace ScrcpyNet
             var cts = new CancellationTokenSource();
             var receiver = new SerilogOutputReceiver();
 
-            string version = "1.21";
+            string version = "1.23";
             int maxFramerate = 0;
             ScrcpyLockVideoOrientation orientation = ScrcpyLockVideoOrientation.Unlocked; // -1 means allow rotate
             bool control = true;
@@ -307,6 +307,9 @@ namespace ScrcpyNet
             cmds.Add("display_id=0");
             cmds.Add($"show_touches={showTouches}");
             cmds.Add($"stay_awake={stayAwake}");
+            cmds.Add("power_off_on_close=false");
+            cmds.Add("downsize_on_error=true");
+            cmds.Add("cleanup=true");
 
             string command = string.Join(" ", cmds);
 

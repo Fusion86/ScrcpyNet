@@ -3,13 +3,12 @@ using ReactiveUI.Fody.Helpers;
 using SharpAdbClient;
 using System;
 using System.Reactive;
-using System.Threading.Tasks;
 
 namespace ScrcpyNet.Sample.ViewModels
 {
     public class ScrcpyViewModel : ViewModelBase
     {
-        [Reactive] public double Bitrate { get; set; } = 8000000;
+        [Reactive] public double BitrateKb { get; set; } = 8_000;
 
         [Reactive] public bool IsConnected { get; private set; }
         [Reactive] public string DeviceName { get; private set; } = "";
@@ -35,7 +34,7 @@ namespace ScrcpyNet.Sample.ViewModels
             if (Scrcpy != null) throw new Exception("Already connected.");
 
             Scrcpy = new Scrcpy(device);
-            Scrcpy.Bitrate = (long)Bitrate;
+            Scrcpy.Bitrate = (long)(BitrateKb * 1000);
             Scrcpy.Start();
             DeviceName = Scrcpy.DeviceName;
             IsConnected = true;

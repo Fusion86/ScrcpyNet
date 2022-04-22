@@ -56,12 +56,13 @@
                     </ComboBox>
                 </DockPanel>
 
-                <TextBox Text="{Binding Scrcpy.Bitrate, Converter={StaticResource IntegerValueConverter}, UpdateSourceTrigger=PropertyChanged}"
-                         Margin="0,2,0,0"
+                <TextBlock Text="Bitrate (kbit/s)" Margin="0,4,0,2"/>
+
+                <TextBox Text="{Binding Scrcpy.BitrateKb, Converter={StaticResource IntegerValueConverter}, UpdateSourceTrigger=PropertyChanged}"
                          PreviewTextInput="TextBox_PreviewTextInput"/>
 
                 <Button Content="Connect"
-                        Margin="0,2,0,0"
+                        Margin="0,4,0,0"
                         Command="{Binding Scrcpy.ConnectCommand}"
                         CommandParameter="{Binding SelectedDevice}"/>
             </StackPanel>

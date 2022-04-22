@@ -4,7 +4,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>net5.0-windows</TargetFramework>
-		<Version>0.0.1</Version>
+		<Version>0.0.2</Version>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<UseWPF>true</UseWPF>
 	</PropertyGroup>
