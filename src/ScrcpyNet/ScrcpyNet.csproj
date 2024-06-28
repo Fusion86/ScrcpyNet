@@ -11,12 +11,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FFmpeg.AutoGen" Version="4.4.1.1" />
-        <PackageReference Include="Serilog" Version="2.10.0" />
+        <PackageReference Include="FFmpeg.AutoGen" Version="7.0.0" />
+        <PackageReference Include="Serilog" Version="4.0.0" />
         <PackageReference Include="SharpAdbClient" Version="2.3.23" />
         <PackageReference Include="System.Buffers" Version="4.5.1" />
-        <PackageReference Include="System.Memory" Version="4.5.4" />
-        <PackageReference Include="System.Threading.Channels" Version="6.0.0" />
+        <PackageReference Include="System.Memory" Version="4.5.5" />
+        <PackageReference Include="System.Threading.Channels" Version="8.0.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -35,6 +35,10 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <PackageCopyToOutput>true</PackageCopyToOutput>
         </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Update="Microsoft.SourceLink.GitHub" Version="8.0.0" />
     </ItemGroup>
 
 </Project>
