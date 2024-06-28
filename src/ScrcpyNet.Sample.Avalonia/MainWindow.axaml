@@ -44,7 +44,7 @@
                     </ComboBox>
                 </DockPanel>
 
-                <NumericUpDown Value="{Binding Scrcpy.Bitrate}"/>
+                <NumericUpDown Value="{Binding Scrcpy.BitrateKb}"/>
 
                 <Button Content="Connect"
                         Command="{Binding Scrcpy.ConnectCommand}"
