@@ -6,7 +6,7 @@ using System;
 
 namespace ScrcpyNet.Sample.Avalonia
 {
-    public class MainWindow : Window
+    public partial class MainWindow : Window
     {
         public MainWindow()
         {
