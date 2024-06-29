@@ -33,7 +33,7 @@
                         </Viewbox>
                     </Button>
 
-                    <ComboBox Items="{Binding AvailableDevices}"
+                    <ComboBox ItemsSource="{Binding AvailableDevices}"
                               SelectedItem="{Binding SelectedDevice}"
                               HorizontalAlignment="Stretch">
                         <ComboBox.ItemTemplate>
