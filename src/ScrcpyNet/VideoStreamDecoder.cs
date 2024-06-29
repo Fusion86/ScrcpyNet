@@ -26,19 +26,19 @@ namespace ScrcpyNet
 
         public int Width { get; }
         public int Height { get; }
-        //public int FrameNumber { get; }
+        public long FrameNumber { get; }
         public AVPixelFormat PixelFormat { get; }
 
         private readonly byte* data;
         private readonly int length;
 
-        public FrameData(byte* data, int length, int width, int height, int frameNumber, AVPixelFormat pixelFormat)
+        public FrameData(byte* data, int length, int width, int height, long frameNumber, AVPixelFormat pixelFormat)
         {
             this.data = data;
             this.length = length;
             Width = width;
             Height = height;
-            //FrameNumber = frameNumber;
+            FrameNumber = frameNumber;
             PixelFormat = pixelFormat;
         }
 
@@ -223,7 +223,7 @@ namespace ScrcpyNet
                         }
 
                         // FrameData takes ownership of the destBufferPtr and will free it when disposed!
-                        lastFrame = new FrameData(destBufferPtr, destSize, frame->width, frame->height, 1, AVPixelFormat.AV_PIX_FMT_BGRA);
+                        lastFrame = new FrameData(destBufferPtr, destSize, frame->width, frame->height, ctx->frame_num, AVPixelFormat.AV_PIX_FMT_BGRA);
                         OnFrame?.Invoke(this, lastFrame);
                     }
                     else
